@@ -1,0 +1,44 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /platform
+
+spring:
+  application:
+    name: openmall-platform
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/openmall?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    open-in-view: false
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+    mode: HTML
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 2
+      timeout: 3000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
+logging:
+  level:
+    com.qoobot.openmall: debug
+    org.springframework.security: debug

@@ -1,0 +1,35 @@
+/* 购物车样式 */
+
+.cart-item {
+    transition: background-color 0.2s;
+}
+
+.cart-item:hover {
+    background-color: #f8f9fa;
+}
+
+.cart-item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.quantity-control .btn {
+    width: 32px;
+}
+
+.quantity-input {
+    width: 50px;
+}
+
+.subtotal {
+    color: #f56565;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+#cartEmpty i {
+    color: #dee2e6;
+}

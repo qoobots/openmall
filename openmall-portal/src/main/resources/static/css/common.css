@@ -1,0 +1,114 @@
+/* 通用样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background-color: #f5f5f5;
+}
+
+/* 顶部导航 */
+.top-navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 24px;
+}
+
+/* 主内容区 */
+.main-content {
+    min-height: calc(100vh - 300px);
+    padding: 20px 0;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 15px 20px;
+    font-weight: 600;
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: 6px;
+    padding: 8px 20px;
+}
+
+.btn-primary {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.btn-primary:hover {
+    background-color: #5568d3;
+    border-color: #5568d3;
+}
+
+.btn-danger {
+    background-color: #f56565;
+    border-color: #f56565;
+}
+
+/* 表单样式 */
+.form-control {
+    border-radius: 6px;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* 分页样式 */
+.pagination .page-link {
+    color: #667eea;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* 价格样式 */
+.price {
+    color: #f56565;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.original-price {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+/* 商品卡片 */
+.product-card {
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
+
+/* 徽章样式 */
+.badge {
+    border-radius: 4px;
+}

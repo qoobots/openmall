@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.qoobot</groupId>
+        <artifactId>openmall</artifactId>
+        <version>10.3.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>openmall-common</artifactId>
+    <packaging>pom</packaging>
+    <name>openmall-common</name>
+    <description>Common Modules</description>
+
+    <modules>
+        <module>common-core</module>
+        <module>common-domain</module>
+        <module>common-security</module>
+        <module>common-web</module>
+    </modules>
+
+</project>

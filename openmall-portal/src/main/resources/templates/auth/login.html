@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})">
+<head>
+    <title>用户登录 - OpenMall</title>
+    <link th:fragment="head-link" th:href="@{/css/auth.css}" rel="stylesheet">
+</head>
+<body>
+    <main th:fragment="main-content" class="auth-page">
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100">
+                <div class="col-md-5">
+                    <div class="card shadow">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-shopping-bag fa-3x text-primary"></i>
+                                <h2 class="mt-3">用户登录</h2>
+                            </div>
+                            
+                            <div th:if="${param.error}" class="alert alert-danger">
+                                用户名或密码错误
+                            </div>
+                            
+                            <form th:action="@{/auth/do-login}" method="post" id="loginForm">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">用户名</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">密码</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+                                    <label class="form-check-label" for="rememberMe">记住我</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">登录</button>
+                            </form>
+                            
+                            <div class="text-center mt-3">
+                                <p>还没有账号？ <a th:href="@{/auth/register}">立即注册</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script th:fragment="script"></script>
+</body>
+</html>

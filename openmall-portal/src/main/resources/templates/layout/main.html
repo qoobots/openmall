@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="main(title, css, content, js)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${title}">OpenMall - 开源B2B2C电商平台</title>
+    
+    <!-- Bootstrap CSS -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    
+    <!-- 自定义CSS -->
+    <link th:href="@{/css/common.css}" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <th:block th:replace="${css}" />
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light top-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shopping-bag text-primary"></i> OpenMall
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">首页</a>
+                    </li>
+                    <li class="nav-item" th:each="category : ${topCategories}">
+                        <a class="nav-link" th:href="@{/product/list(categoryId=${category.id})}" th:text="${category.categoryName}"></a>
+                    </li>
+                </ul>
+                <form class="d-flex me-3" th:action="@{/search}" method="get">
+                    <input class="form-control me-2" type="search" name="keyword" placeholder="搜索商品..." required>
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                <ul class="navbar-nav">
+                    <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                        <a class="nav-link" th:href="@{/user/index}">
+                            <i class="fas fa-user"></i> <span th:text="${#authentication.principal.nickname}"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item" th:unless="${#authorization.expression('isAuthenticated()')}">
+                        <a class="nav-link" th:href="@{/auth/login}">登录</a>
+                    </li>
+                    <li class="nav-item" th:unless="${#authorization.expression('isAuthenticated()')}">
+                        <a class="nav-link" th:href="@{/auth/register}">注册</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" th:href="@{/cart/index}">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  th:if="${cartCount != null and cartCount > 0}"
+                                  th:text="${cartCount}"></span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <main class="main-content">
+        <div th:replace="${content}"></div>
+    </main>
+
+    <!-- 底部 -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>关于OpenMall</h5>
+                    <p class="text-muted">开源B2B2C电商平台，基于Spring Boot + Thymeleaf开发</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-muted text-decoration-none">首页</a></li>
+                        <li><a href="/help" class="text-muted text-decoration-none">帮助中心</a></li>
+                        <li><a href="/about" class="text-muted text-decoration-none">关于我们</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>联系我们</h5>
+                    <p class="text-muted"><i class="fas fa-envelope"></i> support@openmall.com</p>
+                    <p class="text-muted"><i class="fas fa-phone"></i> 400-888-8888</p>
+                </div>
+            </div>
+            <hr class="bg-secondary">
+            <p class="text-center text-muted mb-0">© 2024 OpenMall. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+    <!-- Bootstrap JS -->
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- 自定义JS -->
+    <script th:src="@{/js/common.js}"></script>
+    
+    <th:block th:replace="${js}" />
+</body>
+</html>

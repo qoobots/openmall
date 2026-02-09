@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title th:text="${product.productName} + ' - 商品详情'">商品详情 - OpenMall</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- 面包屑 -->
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">首页</a></li>
+                <li class="breadcrumb-item"><a href="#">商品分类</a></li>
+                <li class="breadcrumb-item active" th:text="${product.productName}"></li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="product-detail-container">
+            <div class="row">
+                <!-- 商品图片 -->
+                <div class="col-md-5">
+                    <div class="product-gallery">
+                        <div class="main-image">
+                            <img id="mainImage" th:src="${product.mainImage}" alt="商品图片">
+                        </div>
+                        <div class="thumbnail-list" th:if="${product.albumImages != null and !#strings.isEmpty(product.albumImages)}">
+                            <img th:each="image : ${product.albumImages.split(',')}"
+                                 th:src="${image}"
+                                 class="thumbnail"
+                                 onclick="changeMainImage(this.src)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 商品信息 -->
+                <div class="col-md-7">
+                    <div class="product-info">
+                        <h1 class="product-name" th:text="${product.productName}"></h1>
+                        <p class="product-subtitle" th:text="${product.productSubTitle}"></p>
+
+                        <!-- 价格 -->
+                        <div class="price-section">
+                            <span class="label">价格：</span>
+                            <span class="price" th:if="${minPrice == maxPrice}" th:text="'¥' + ${minPrice}"></span>
+                            <span class="price" th:if="${minPrice != maxPrice}"
+                                  th:text="'¥' + ${minPrice} + ' - ¥' + ${maxPrice}"></span>
+                            <span class="sales">销量：<span th:text="${product.sales}"></span></span>
+                        </div>
+
+                        <!-- SKU选择 -->
+                        <div class="sku-section" id="skuSection">
+                            <div class="sku-item" th:each="attr : ${detailVO.saleAttributes}">
+                                <label th:text="${attr.attrName} + '：'"></label>
+                                <div class="sku-options">
+                                    <span th:each="value : ${attr.attrValues}"
+                                          class="sku-option"
+                                          th:data-sku-id="${value.id}"
+                                          th:text="${value.attrValue}"
+                                          onclick="selectSku(this)"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 购买数量 -->
+                        <div class="quantity-section">
+                            <label>数量：</label>
+                            <div class="input-group" style="width: 150px;">
+                                <button type="button" class="btn btn-outline-secondary" onclick="decreaseQuantity()">-</button>
+                                <input type="number" id="quantity" class="form-control text-center" value="1" min="1" th:max="${stock}">
+                                <button type="button" class="btn btn-outline-secondary" onclick="increaseQuantity()">+</button>
+                            </div>
+                            <span class="stock-info">库存：<strong th:text="${stock}"></strong> 件</span>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-danger btn-lg" onclick="addToCart()">
+                                <i class="fas fa-shopping-cart"></i> 加入购物车
+                            </button>
+                            <button type="button" class="btn btn-primary btn-lg" onclick="buyNow()">
+                                <i class="fas fa-bolt"></i> 立即购买
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="addFavorite()">
+                                <i class="far fa-heart"></i> 收藏
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品详情Tab -->
+        <div class="product-tabs mt-5">
+            <ul class="nav nav-tabs" id="productTab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#detail" type="button">商品详情</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#specs" type="button">规格参数</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews" type="button">
+                        商品评价 <span class="badge bg-secondary" th:text="${reviewCount}"></span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="detail">
+                    <div class="product-desc" th:utext="${product.productDesc}"></div>
+                </div>
+                <div class="tab-pane fade" id="specs">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr><td>商品名称</td><td th:text="${product.productName}"></td></tr>
+                            <tr><td>商品编号</td><td th:text="${product.id}"></td></tr>
+                            <tr><td>上架时间</td><td th:text="${#temporals.format(product.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="reviews">
+                    <div class="review-empty">
+                        <p>暂无评价，快来抢沙发吧！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div layout:fragment="script">
+<script>
+    let selectedSkuId = null;
+
+    // 切换主图
+    function changeMainImage(src) {
+        document.getElementById('mainImage').src = src;
+    }
+
+    // 选择SKU
+    function selectSku(element) {
+        const parent = element.closest('.sku-item');
+        parent.querySelectorAll('.sku-option').forEach(opt => opt.classList.remove('active'));
+        element.classList.add('active');
+        selectedSkuId = element.dataset.skuId;
+    }
+
+    // 数量增减
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        if (input.value > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+
+    function increaseQuantity() {
+        const input = document.getElementById('quantity');
+        const max = parseInt(input.max);
+        if (input.value < max) {
+            input.value = parseInt(input.value) + 1;
+        }
+    }
+
+    // 加入购物车
+    function addToCart() {
+        const skuId = selectedSkuId || document.querySelector('.sku-option')?.dataset.skuId;
+        const quantity = document.getElementById('quantity').value;
+
+        if (!skuId) {
+            Swal.fire({
+                icon: 'warning',
+                title: '提示',
+                text: '请选择商品规格'
+            });
+            return;
+        }
+
+        $.ajax({
+            url: '/cart/add',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                skuId: parseInt(skuId),
+                quantity: parseInt(quantity)
+            }),
+            success: function(response) {
+                if (response.code === 200) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '成功',
+                        text: response.message || '已加入购物车',
+                        timer: 1500
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '失败',
+                        text: response.message
+                    });
+                }
+            }
+        });
+    }
+
+    // 立即购买
+    function buyNow() {
+        const skuId = selectedSkuId || document.querySelector('.sku-option')?.dataset.skuId;
+        const quantity = document.getElementById('quantity').value;
+
+        if (!skuId) {
+            Swal.fire({
+                icon: 'warning',
+                title: '提示',
+                text: '请选择商品规格'
+            });
+            return;
+        }
+
+        window.location.href = '/order/confirm?skuId=' + skuId + '&quantity=' + quantity;
+    }
+
+    // 收藏
+    function addFavorite() {
+        Swal.fire({
+            icon: 'success',
+            title: '成功',
+            text: '已添加收藏',
+            timer: 1500
+        });
+    }
+</script>
+</div>
+</body>
+</html>
