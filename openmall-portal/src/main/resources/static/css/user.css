@@ -1,0 +1,598 @@
+/* 用户中心通用样式 */
+
+/* 侧边栏 */
+.user-sidebar {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.user-info-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.user-info-card .avatar img {
+    width: 80px;
+    height: 80px;
+    border: 3px solid rgba(255,255,255,0.3);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.user-info-card .user-info h5 {
+    margin: 15px 0 5px;
+    font-size: 18px;
+}
+
+.user-info-card .user-info p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.user-nav {
+    padding: 10px 0;
+}
+
+.user-nav .nav-link {
+    padding: 12px 20px;
+    color: #333;
+    border-radius: 0;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-nav .nav-link:hover {
+    background: #f8f9fa;
+    color: #ff6b6b;
+}
+
+.user-nav .nav-link.active {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+.user-nav .nav-link i {
+    width: 20px;
+    text-align: center;
+}
+
+/* 主内容区 */
+.user-main-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    min-height: 600px;
+}
+
+.user-main-content h3 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* 统计卡片 */
+.order-statistics .stat-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s;
+    height: 100%;
+}
+
+.order-statistics .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.stat-icon i {
+    font-size: 36px;
+    opacity: 0.8;
+}
+
+.stat-info h5 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 0 5px;
+}
+
+.stat-info p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* 订单列表 */
+.recent-orders .order-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.recent-orders .order-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.order-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-header .order-info span {
+    margin-right: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.order-items {
+    padding: 15px 20px;
+}
+
+.order-product {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.order-product:last-child {
+    border-bottom: none;
+}
+
+.order-product .product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 15px;
+}
+
+.order-product .product-info {
+    flex: 1;
+}
+
+.order-product .product-info h6 {
+    margin: 0 0 5px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.order-product .product-info h6 a {
+    color: #333;
+}
+
+.order-product .product-info p {
+    margin: 0;
+    font-size: 12px;
+    color: #999;
+}
+
+.order-product .product-price {
+    text-align: right;
+    min-width: 120px;
+}
+
+.order-product .product-price .price {
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.order-product .product-price .quantity {
+    color: #999;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.order-footer {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-footer .order-total .total-amount {
+    color: #ff6b6b;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.order-footer .order-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* 地址卡片 */
+.address-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    height: 100%;
+    transition: all 0.3s;
+    background: #fff;
+}
+
+.address-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.address-card.address-default {
+    border-color: #ff6b6b;
+    background: #fff5f5;
+}
+
+.address-card .card-header {
+    background: transparent;
+    border-bottom: 1px solid #eee;
+    padding: 15px 20px;
+}
+
+.address-card .card-body {
+    padding: 20px;
+}
+
+.address-card .card-footer {
+    background: transparent;
+    border-top: 1px solid #eee;
+    padding: 10px 20px;
+}
+
+.address-info p {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.address-info p i {
+    width: 16px;
+    margin-right: 8px;
+    color: #999;
+}
+
+/* 收藏列表 */
+.favorite-item {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s;
+    height: 100%;
+}
+
+.favorite-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.favorite-item .item-image {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+}
+
+.favorite-item .item-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.favorite-item:hover .item-image img {
+    transform: scale(1.05);
+}
+
+.favorite-item .item-checkbox {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+}
+
+.favorite-item .item-info {
+    padding: 15px;
+}
+
+.favorite-item .item-title {
+    font-size: 14px;
+    margin: 0 0 10px;
+    height: 40px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.favorite-item .item-title a {
+    color: #333;
+    transition: color 0.3s;
+}
+
+.favorite-item .item-title a:hover {
+    color: #ff6b6b;
+}
+
+.favorite-item .item-price {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.favorite-item .item-price .price {
+    color: #ff6b6b;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.favorite-item .item-price .original-price {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 12px;
+}
+
+.favorite-item .item-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.favorite-item .item-actions .add-to-cart {
+    flex: 1;
+}
+
+/* 空状态 */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 64px;
+    opacity: 0.3;
+    margin-bottom: 20px;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* 信息卡片 */
+.info-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    height: 100%;
+}
+
+.info-card .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.info-list .info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.info-list .info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-list .info-item .label {
+    color: #666;
+}
+
+.info-list .info-item .value {
+    color: #333;
+    font-weight: 500;
+}
+
+/* 金额列表 */
+.amount-list {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.amount-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.amount-item:last-child {
+    margin-bottom: 0;
+}
+
+.amount-item.total {
+    border-top: 1px solid #dee2e6;
+    padding-top: 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.amount-item.total .total-amount {
+    color: #ff6b6b;
+    font-size: 18px;
+}
+
+/* 订单状态进度 */
+.order-status-progress {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50px;
+    right: 50px;
+    height: 2px;
+    background: #e9ecef;
+    z-index: 1;
+}
+
+.progress-steps .step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.step-icon i {
+    color: #6c757d;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.step.completed .step-icon {
+    background: #28a745;
+}
+
+.step.completed .step-icon i {
+    color: #fff;
+}
+
+.step-label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.step-time {
+    font-size: 12px;
+    color: #999;
+}
+
+/* 物流信息 */
+.logistics-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.logistics-item {
+    position: relative;
+    padding-left: 30px;
+    padding-bottom: 15px;
+    border-left: 2px solid #e9ecef;
+}
+
+.logistics-item.active {
+    border-left-color: #ff6b6b;
+}
+
+.logistics-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e9ecef;
+}
+
+.logistics-item.active::before {
+    background: #ff6b6b;
+}
+
+.logistics-time {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+.logistics-desc {
+    font-size: 14px;
+    color: #333;
+}
+
+.logistics-item.active .logistics-time,
+.logistics-item.active .logistics-desc {
+    color: #ff6b6b;
+    font-weight: 500;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .user-main-content {
+        padding: 20px;
+    }
+    
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .order-product {
+        flex-wrap: wrap;
+    }
+    
+    .order-product .product-price {
+        width: 100%;
+        text-align: left;
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .progress-steps {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .step-label {
+        font-size: 12px;
+    }
+}

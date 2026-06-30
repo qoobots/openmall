@@ -107,7 +107,7 @@ openmall/
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/qoobot/openmall.git
+git clone https://github.com/qoobot-com/openmall.git
 cd openmall
 ```
 
@@ -204,7 +204,7 @@ git push origin main
 
 ## 联系方式
 
-- 官网: https://github.com/qoobot/openmall
+- 官网: https://github.com/qoobot-com/openmall
 - 邮箱: support@openmall.com
 
 ## 致谢

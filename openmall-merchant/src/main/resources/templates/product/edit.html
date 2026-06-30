@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})">
+<head>
+    <title th:text="${product == null ? '发布商品' : '编辑商品'} + ' - 商家后台'">商品编辑</title>
+    <link th:href="@{/css/product.css}" rel="stylesheet">
+</head>
+<body>
+    <main th:fragment="main-content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h3 th:text="${product == null ? '发布商品' : '编辑商品'}">发布商品</h3>
+                </div>
+            </div>
+            
+            <form id="productForm" class="product-form">
+                <input type="hidden" name="id" th:value="${product?.id}">
+                
+                <div class="row">
+                    <!-- 左侧基本信息 -->
+                    <div class="col-md-8">
+                        <!-- 基本信息 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">基本信息</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label required">商品名称</label>
+                                        <input type="text" class="form-control" name="productName" 
+                                               th:value="${product?.productName}" required maxlength="200">
+                                        <div class="form-text">建议填写完整的商品名称，不超过200个字符</div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">商品副标题</label>
+                                        <input type="text" class="form-control" name="productSubTitle" 
+                                               th:value="${product?.productSubTitle}" maxlength="200">
+                                        <div class="form-text">简要描述商品特点，不超过200个字符</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">商品分类</label>
+                                        <select class="form-select" name="categoryId" required>
+                                            <option value="">请选择分类</option>
+                                            <option th:each="category : ${categories}" 
+                                                    th:value="${category.id}" 
+                                                    th:text="${category.categoryName}"
+                                                    th:selected="${product?.categoryId == category.id}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">商品品牌</label>
+                                        <select class="form-select" name="brandId">
+                                            <option value="">请选择品牌</option>
+                                            <option th:each="brand : ${brands}" 
+                                                    th:value="${brand.id}" 
+                                                    th:text="${brand.brandName}"
+                                                    th:selected="${product?.brandId == brand.id}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label required">商品详情</label>
+                                        <textarea class="form-control" name="productDesc" rows="6" 
+                                                  th:text="${product?.productDesc}" required></textarea>
+                                        <div class="form-text">详细描述商品信息，支持图文混排</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 商品规格 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">商品规格（SKU）</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="sku-section">
+                                    <div class="sku-attrs mb-4">
+                                        <h6>规格属性</h6>
+                                        <div class="sku-attr-list" id="skuAttrList">
+                                            <!-- 动态生成规格属性 -->
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSkuAttr()">
+                                            <i class="fas fa-plus"></i> 添加规格属性
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="sku-table">
+                                        <h6>SKU列表</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered" id="skuTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>规格</th>
+                                                        <th>价格（元）</th>
+                                                        <th>库存</th>
+                                                        <th>商品编码</th>
+                                                        <th>操作</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- 动态生成SKU行 -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 商品图片 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">商品图片</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label required">商品主图</label>
+                                        <div class="upload-area" id="mainImageUpload">
+                                            <div class="upload-placeholder" th:if="${product?.mainImage == null}">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <p>点击上传商品主图</p>
+                                                <p class="text-muted">建议尺寸：800x800px，支持jpg、png格式</p>
+                                            </div>
+                                            <img th:if="${product?.mainImage != null}" 
+                                                 th:src="${product.mainImage}" 
+                                                 class="uploaded-image">
+                                            <input type="hidden" name="mainImage" th:value="${product?.mainImage}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">商品相册</label>
+                                        <div class="upload-area multiple" id="albumUpload">
+                                            <div class="upload-images" id="albumImages">
+                                                <div class="upload-item" th:each="image : ${product?.albumImagesList}">
+                                                    <img th:src="${image}" class="uploaded-image">
+                                                    <button type="button" class="btn-remove" onclick="removeImage(this)">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    <input type="hidden" name="albumImages" th:value="${image}">
+                                                </div>
+                                            </div>
+                                            <div class="upload-placeholder" onclick="uploadAlbumImage()">
+                                                <i class="fas fa-plus"></i>
+                                                <p>添加图片</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧其他信息 -->
+                    <div class="col-md-4">
+                        <!-- 价格库存 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">价格库存</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">商品编码</label>
+                                    <input type="text" class="form-control" name="productCode" 
+                                           th:value="${product?.productCode}" maxlength="50">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">商品条形码</label>
+                                    <input type="text" class="form-control" name="barCode" 
+                                           th:value="${product?.barCode}" maxlength="50">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">商品重量（kg）</label>
+                                    <input type="number" class="form-control" name="weight" 
+                                           th:value="${product?.weight}" step="0.01">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label required">运费模板</label>
+                                    <select class="form-select" name="freightTemplateId" required>
+                                        <option value="">请选择运费模板</option>
+                                        <option th:each="template : ${freightTemplates}" 
+                                                th:value="${template.id}" 
+                                                th:text="${template.templateName}"
+                                                th:selected="${product?.freightTemplateId == template.id}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 其他信息 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">其他信息</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">商品标签</label>
+                                    <input type="text" class="form-control" name="tags" 
+                                           th:value="${product?.tags}" placeholder="多个标签用逗号分隔">
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="isNew" value="1"
+                                               th:checked="${product?.isNew == 1}">
+                                        <label class="form-check-label">新品</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="isHot" value="1"
+                                               th:checked="${product?.isHot == 1}">
+                                        <label class="form-check-label">热销</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="isRecommend" value="1"
+                                               th:checked="${product?.isRecommend == 1}">
+                                        <label class="form-check-label">推荐</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">排序</label>
+                                    <input type="number" class="form-control" name="sortOrder" 
+                                           th:value="${product?.sortOrder ?: 0}" min="0">
+                                    <div class="form-text">数值越大，排序越靠前</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 保存按钮 -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-success btn-lg" onclick="saveProduct()">
+                                        <i class="fas fa-save"></i> 保存商品
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="previewProduct()">
+                                        <i class="fas fa-eye"></i> 预览
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script th:fragment="script">
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.4.2/tinymce.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tinymce/tinymce-jquery@2.0.0/dist/tinymce-jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 初始化富文本编辑器
+            tinymce.init({
+                selector: 'textarea[name="productDesc"]',
+                language: 'zh_CN',
+                height: 400,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                    'bold italic backcolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+                content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }'
+            });
+            
+            console.log('商品编辑页面加载完成');
+        });
+        
+        // 保存商品
+        function saveProduct() {
+            const formData = new FormData($('#productForm')[0]);
+            const data = {};
+            
+            // 转换FormData为普通对象
+            formData.forEach((value, key) => {
+                if (key.endsWith('[]')) {
+                    key = key.slice(0, -2);
+                    if (!data[key]) data[key] = [];
+                    data[key].push(value);
+                } else {
+                    data[key] = value;
+                }
+            });
+            
+            // 获取富文本内容
+            data.productDesc = tinymce.get('productDesc').getContent();
+            
+            // 获取SKU数据
+            data.skus = getSkuData();
+            
+            showLoading();
+            ajaxRequest('/product/save', 'POST', data, function(response) {
+                hideLoading();
+                successAlert('成功', '商品保存成功', function() {
+                    if (!data.id) {
+                        // 如果是新增，跳转到编辑页面
+                        window.location.href = '/product/edit/' + response.data;
+                    } else {
+                        location.reload();
+                    }
+                });
+            });
+        }
+        
+        // 预览商品
+        function previewProduct() {
+            const productId = $('input[name="id"]').val();
+            if (productId) {
+                window.open('/product/preview/' + productId, '_blank');
+            } else {
+                errorAlert('提示', '请先保存商品再预览');
+            }
+        }
+        
+        // 获取SKU数据
+        function getSkuData() {
+            const skus = [];
+            $('#skuTable tbody tr').each(function() {
+                const sku = {
+                    specs: $(this).find('.sku-specs').text(),
+                    price: $(this).find('input[name="skuPrice"]').val(),
+                    stock: $(this).find('input[name="skuStock"]').val(),
+                    skuCode: $(this).find('input[name="skuCode"]').val()
+                };
+                skus.push(sku);
+            });
+            return skus;
+        }
+        
+        // 添加规格属性
+        function addSkuAttr() {
+            // 实现规格属性添加逻辑
+            console.log('添加规格属性');
+        }
+        
+        // 上传主图
+        $('#mainImageUpload').click(function() {
+            // 实现图片上传逻辑
+            console.log('上传主图');
+        });
+        
+        // 上传相册图片
+        function uploadAlbumImage() {
+            // 实现相册图片上传逻辑
+            console.log('上传相册图片');
+        }
+        
+        // 删除图片
+        function removeImage(btn) {
+            $(btn).closest('.upload-item').remove();
+        }
+    </script>
+    </script>
+</body>
+</html>

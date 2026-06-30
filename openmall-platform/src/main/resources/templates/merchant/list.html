@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/platform-main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})">
+<head>
+    <title>商家管理 - 平台后台</title>
+    <link th:href="@{/css/platform.css}" rel="stylesheet">
+</head>
+<body>
+    <main th:fragment="main-content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h3>商家管理</h3>
+                </div>
+            </div>
+            
+            <!-- 统计卡片 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-store text-primary"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h5 th:text="${statistics?.totalMerchant ?: 0}">0</h5>
+                            <p>商家总数</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock text-warning"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h5 th:text="${statistics?.pendingReview ?: 0}">0</h5>
+                            <p>待审核</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle text-success"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h5 th:text="${statistics?.approved ?: 0}">0</h5>
+                            <p>已通过</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle text-danger"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h5 th:text="${statistics?.rejected ?: 0}">0</h5>
+                            <p>已拒绝</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 搜索和筛选 -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <form class="row g-3" th:action="@{/merchant/list}" method="get">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" name="keyword" 
+                                           placeholder="商家名称/手机号" th:value="${keyword}">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" name="status">
+                                        <option value="">全部状态</option>
+                                        <option value="0" th:selected="${status == '0'}">待审核</option>
+                                        <option value="1" th:selected="${status == '1'}">已通过</option>
+                                        <option value="2" th:selected="${status == '2'}">已拒绝</option>
+                                        <option value="3" th:selected="${status == '3'}">已禁用</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" name="startDate" 
+                                           th:value="${startDate}" placeholder="开始日期">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" name="endDate" 
+                                           th:value="${endDate}" placeholder="结束日期">
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-search"></i> 搜索
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                        <i class="fas fa-undo"></i> 重置
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 商家列表 -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th width="50">
+                                                <input type="checkbox" id="checkAll" onchange="toggleCheckAll()">
+                                            </th>
+                                            <th>商家信息</th>
+                                            <th>公司信息</th>
+                                            <th>店铺</th>
+                                            <th>状态</th>
+                                            <th>创建时间</th>
+                                            <th width="200">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="merchant : ${page?.content}">
+                                            <td>
+                                                <input type="checkbox" name="merchantIds" th:value="${merchant.id}">
+                                            </td>
+                                            <td>
+                                                <div class="merchant-info">
+                                                    <div class="merchant-avatar">
+                                                        <img th:src="${merchant.avatar ?: '/images/default-avatar.png'}" 
+                                                             alt="头像" class="rounded-circle">
+                                                    </div>
+                                                    <div>
+                                                        <div class="merchant-name" th:text="${merchant.username}">商家账号</div>
+                                                        <div class="merchant-phone" th:text="${merchant.mobile}">13800000000</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="company-info">
+                                                    <div class="company-name" th:text="${merchant.companyName}">公司名称</div>
+                                                    <div class="business-license" th:text="${merchant.businessLicense}">营业执照号</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div th:if="${merchant.shopName != null}">
+                                                    <div th:text="${merchant.shopName}">店铺名称</div>
+                                                    <div class="text-muted" th:text="${merchant.shopTypeText}">旗舰店</div>
+                                                </div>
+                                                <div th:if="${merchant.shopName == null}" class="text-muted">未开店</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge" 
+                                                      th:classappend="${merchant.statusBadge}" 
+                                                      th:text="${merchant.statusText}">待审核</span>
+                                            </td>
+                                            <td th:text="${#temporals.format(merchant.createTime, 'yyyy-MM-dd')}">2024-01-01</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a th:href="@{/merchant/detail/{id}(id=${merchant.id})}" 
+                                                       class="btn btn-sm btn-outline-primary" 
+                                                       title="查看详情">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-outline-success" 
+                                                            th:if="${merchant.status == 0}"
+                                                            th:data-id="${merchant.id}"
+                                                            onclick="approveMerchant(this)">
+                                                        <i class="fas fa-check"></i> 审核通过
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                            th:if="${merchant.status == 0}"
+                                                            th:data-id="${merchant.id}"
+                                                            onclick="rejectMerchant(this)">
+                                                        <i class="fas fa-times"></i> 拒绝
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-warning" 
+                                                            th:if="${merchant.status == 1}"
+                                                            th:data-id="${merchant.id}"
+                                                            onclick="disableMerchant(this)">
+                                                        <i class="fas fa-ban"></i> 禁用
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-info" 
+                                                            th:if="${merchant.status == 3}"
+                                                            th:data-id="${merchant.id}"
+                                                            onclick="enableMerchant(this)">
+                                                        <i class="fas fa-unlock"></i> 启用
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- 空状态 -->
+                            <div class="empty-state" th:if="${page?.content == null or page.content.isEmpty()}">
+                                <i class="fas fa-store"></i>
+                                <p>暂无商家</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 分页 -->
+                    <div th:if="${page != null and page.totalPages > 1}" 
+                         th:replace="fragments/pagination :: pagination(page, ${'/merchant/list'})">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:fragment="script">
+    <script>
+        $(document).ready(function() {
+            console.log('商家管理页面加载完成');
+        });
+        
+        // 全选/取消全选
+        function toggleCheckAll() {
+            const checked = $('#checkAll').is(':checked');
+            $('input[name="merchantIds"]').prop('checked', checked);
+        }
+        
+        // 审核通过
+        function approveMerchant(btn) {
+            const merchantId = $(btn).data('id');
+            
+            confirmDialog('审核通过', '确定要通过该商家的审核吗？', function() {
+                ajaxRequest('/merchant/approve/' + merchantId, 'POST', null, function(response) {
+                    successAlert('成功', '商家审核已通过');
+                    location.reload();
+                });
+            });
+        }
+        
+        // 拒绝审核
+        function rejectMerchant(btn) {
+            const merchantId = $(btn).data('id');
+            
+            Swal.fire({
+                title: '拒绝审核',
+                input: 'textarea',
+                inputLabel: '拒绝原因',
+                inputPlaceholder: '请输入拒绝原因...',
+                showCancelButton: true,
+                confirmButtonText: '确认拒绝',
+                cancelButtonText: '取消',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return '请输入拒绝原因';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ajaxRequest('/merchant/reject/' + merchantId, 'POST', 
+                               {reason: result.value}, function(response) {
+                        successAlert('成功', '商家审核已拒绝');
+                        location.reload();
+                    });
+                }
+            });
+        }
+        
+        // 禁用商家
+        function disableMerchant(btn) {
+            const merchantId = $(btn).data('id');
+            
+            Swal.fire({
+                title: '禁用商家',
+                input: 'textarea',
+                inputLabel: '禁用原因',
+                inputPlaceholder: '请输入禁用原因...',
+                showCancelButton: true,
+                confirmButtonText: '确认禁用',
+                cancelButtonText: '取消',
+                confirmButtonColor: '#dc3545',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return '请输入禁用原因';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ajaxRequest('/merchant/disable/' + merchantId, 'POST', 
+                               {reason: result.value}, function(response) {
+                        successAlert('成功', '商家已禁用');
+                        location.reload();
+                    });
+                }
+            });
+        }
+        
+        // 启用商家
+        function enableMerchant(btn) {
+            const merchantId = $(btn).data('id');
+            
+            confirmDialog('启用商家', '确定要启用该商家吗？', function() {
+                ajaxRequest('/merchant/enable/' + merchantId, 'POST', null, function(response) {
+                    successAlert('成功', '商家已启用');
+                    location.reload();
+                });
+            });
+        }
+        
+        // 重置表单
+        function resetForm() {
+            window.location.href = '/merchant/list';
+        }
+    </script>
+    </script>
+</body>
+</html>

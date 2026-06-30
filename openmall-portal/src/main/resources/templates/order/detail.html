@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})">
+<head>
+    <title>订单详情 - OpenMall</title>
+    <link th:href="@{/css/order.css}" rel="stylesheet">
+</head>
+<body>
+    <main th:fragment="main-content">
+        <div class="container mt-4">
+            <div class="row">
+                <!-- 侧边栏 -->
+                <div class="col-md-3">
+                    <div th:replace="user/index :: user-sidebar"></div>
+                </div>
+                
+                <!-- 主要内容 -->
+                <div class="col-md-9">
+                    <div class="user-main-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>订单详情</h3>
+                            <div>
+                                <button class="btn btn-sm btn-primary me-2" 
+                                        th:if="${order.orderStatus == 1}"
+                                        onclick="payOrder()">立即付款</button>
+                                <button class="btn btn-sm btn-info me-2" 
+                                        th:if="${order.orderStatus == 3}"
+                                        th:data-order-no="${order.orderNo}"
+                                        onclick="viewLogistics(this)">查看物流</button>
+                                <button class="btn btn-sm btn-success me-2" 
+                                        th:if="${order.orderStatus == 3}"
+                                        onclick="confirmReceipt()">确认收货</button>
+                                <button class="btn btn-sm btn-outline-secondary" 
+                                        th:if="${order.orderStatus == 1}"
+                                        onclick="cancelOrder()">取消订单</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 订单状态进度 -->
+                        <div class="order-status-progress mb-4">
+                            <div class="progress-steps">
+                                <div class="step" th:classappend="${order.orderStatus >= 1 ? 'completed' : ''}">
+                                    <div class="step-icon">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="step-label">提交订单</div>
+                                    <div class="step-time" th:text="${#temporals.format(order.createTime, 'MM-dd HH:mm')}">01-01 12:00</div>
+                                </div>
+                                <div class="step" th:classappend="${order.orderStatus >= 2 ? 'completed' : ''}">
+                                    <div class="step-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="step-label">付款成功</div>
+                                    <div class="step-time" th:if="${order.payTime != null}" 
+                                         th:text="${#temporals.format(order.payTime, 'MM-dd HH:mm')}">01-01 12:05</div>
+                                </div>
+                                <div class="step" th:classappend="${order.orderStatus >= 3 ? 'completed' : ''}">
+                                    <div class="step-icon">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                    <div class="step-label">商家发货</div>
+                                    <div class="step-time" th:if="${order.shipTime != null}" 
+                                         th:text="${#temporals.format(order.shipTime, 'MM-dd HH:mm')}">01-02 10:00</div>
+                                </div>
+                                <div class="step" th:classappend="${order.orderStatus >= 4 ? 'completed' : ''}">
+                                    <div class="step-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="step-label">确认收货</div>
+                                    <div class="step-time" th:if="${order.receiveTime != null}" 
+                                         th:text="${#temporals.format(order.receiveTime, 'MM-dd HH:mm')}">01-05 15:00</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 订单信息 -->
+                        <div class="order-info-section mb-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <h6 class="card-title">订单信息</h6>
+                                        <div class="info-list">
+                                            <div class="info-item">
+                                                <span class="label">订单编号：</span>
+                                                <span class="value" th:text="${order.orderNo}">202401010001</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="label">订单状态：</span>
+                                                <span class="value">
+                                                    <span class="badge" th:classappend="${order.statusBadge}" 
+                                                          th:text="${order.statusText}">待付款</span>
+                                                </span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="label">支付方式：</span>
+                                                <span class="value" th:text="${order.payTypeText}">支付宝</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="label">下单时间：</span>
+                                                <span class="value" th:text="${#temporals.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 12:00:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <h6 class="card-title">收货信息</h6>
+                                        <div class="info-list">
+                                            <div class="info-item">
+                                                <span class="label">收货人：</span>
+                                                <span class="value" th:text="${order.consigneeName}">张三</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="label">手机号：</span>
+                                                <span class="value" th:text="${order.consigneePhone}">13800000000</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="label">收货地址：</span>
+                                                <span class="value" th:text="${order.consigneeAddress}">广东省深圳市南山区xxx路xxx号</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 商品列表 -->
+                        <div class="order-items-section mb-4">
+                            <h6 class="section-title">商品信息</h6>
+                            <div class="order-items-list">
+                                <div class="order-product" th:each="item : ${order.items}">
+                                    <img th:src="${item.mainImage}" alt="商品图片" class="product-image">
+                                    <div class="product-info">
+                                        <h6>
+                                            <a th:href="@{/product/detail/{id}(id=${item.spuId})}" th:text="${item.productName}">商品名称</a>
+                                        </h6>
+                                        <p class="text-muted" th:text="${item.specs}">规格</p>
+                                    </div>
+                                    <div class="product-price">
+                                        <div class="price" th:text="'¥' + ${item.price}">¥99.00</div>
+                                        <div class="quantity">x<span th:text="${item.quantity}">1</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 金额信息 -->
+                        <div class="order-amount-section mb-4">
+                            <h6 class="section-title">金额明细</h6>
+                            <div class="amount-list">
+                                <div class="amount-item">
+                                    <span>商品总额：</span>
+                                    <span th:text="'¥' + ${order.totalAmount}">¥99.00</span>
+                                </div>
+                                <div class="amount-item">
+                                    <span>运费：</span>
+                                    <span th:text="'¥' + ${order.freightAmount}">¥0.00</span>
+                                </div>
+                                <div class="amount-item" th:if="${order.discountAmount > 0}">
+                                    <span>优惠金额：</span>
+                                    <span class="text-danger" th:text="'-¥' + ${order.discountAmount}">-¥0.00</span>
+                                </div>
+                                <div class="amount-item total">
+                                    <span>实付金额：</span>
+                                    <span class="total-amount" th:text="'¥' + ${order.payAmount}">¥99.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 物流信息 -->
+                        <div class="logistics-section mb-4" th:if="${order.logistics != null}">
+                            <h6 class="section-title">物流信息</h6>
+                            <div class="logistics-info">
+                                <p><strong>快递公司：</strong><span th:text="${order.logistics.company}">顺丰速运</span></p>
+                                <p><strong>快递单号：</strong><span th:text="${order.logistics.trackingNo}">SF1234567890</span></p>
+                                <button class="btn btn-sm btn-info" th:data-order-no="${order.orderNo}" onclick="viewLogistics(this)">查看物流详情</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:fragment="script">
+    <script>
+        $(document).ready(function() {
+            console.log('订单详情页面加载完成');
+        });
+        
+        // 立即付款
+        function payOrder() {
+            const orderNo = '[[${order.orderNo}]]';
+            window.location.href = '/order/payment?orderNo=' + orderNo;
+        }
+        
+        // 查看物流
+        function viewLogistics(btn) {
+            const orderNo = $(btn).data('order-no');
+            showLoading();
+            
+            ajaxRequest('/order/logistics/' + orderNo, 'GET', null, function(response) {
+                hideLoading();
+                const logistics = response.data;
+                
+                let html = '<div class="logistics-info">';
+                html += '<p><strong>快递公司：</strong>' + logistics.company + '</p>';
+                html += '<p><strong>快递单号：</strong>' + logistics.trackingNo + '</p>';
+                html += '<div class="logistics-list mt-3">';
+                
+                logistics.traces.forEach(function(trace) {
+                    html += '<div class="logistics-item ' + (trace.isNew ? 'active' : '') + '">';
+                    html += '<div class="logistics-time">' + trace.time + '</div>';
+                    html += '<div class="logistics-desc">' + trace.desc + '</div>';
+                    html += '</div>';
+                });
+                
+                html += '</div></div>';
+                
+                Swal.fire({
+                    title: '物流信息',
+                    html: html,
+                    width: '600px',
+                    showConfirmButton: false,
+                    showCloseButton: true
+                });
+            });
+        }
+        
+        // 确认收货
+        function confirmReceipt() {
+            const orderId = '[[${order.id}]]';
+            
+            confirmDialog('确认收货', '请确认已收到商品', function() {
+                ajaxRequest('/order/confirmReceipt', 'POST', {orderId: orderId}, function(response) {
+                    successAlert('成功', '已确认收货');
+                    location.reload();
+                });
+            });
+        }
+        
+        // 取消订单
+        function cancelOrder() {
+            const orderId = '[[${order.id}]]';
+            
+            confirmDialog('取消订单', '确定要取消该订单吗？', function() {
+                ajaxRequest('/order/cancel', 'POST', {orderId: orderId}, function(response) {
+                    successAlert('成功', '订单已取消');
+                    location.href = '/order/list';
+                });
+            });
+        }
+    </script>
+    </script>
+</body>
+</html>

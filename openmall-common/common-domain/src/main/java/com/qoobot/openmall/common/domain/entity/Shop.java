@@ -30,4 +30,16 @@ public class Shop extends BaseEntity {
 
     @Column(name = "service_phone", length = 20)
     private String servicePhone;
+
+    @Column(name = "service_email", length = 100)
+    private String serviceEmail;
+
+    @Column(name = "service_qq", length = 50)
+    private String serviceQq;
+
+    @Column(name = "service_wechat", length = 50)
+    private String serviceWechat;
+
+    @Column(name = "status", nullable = false)
+    private Integer status;
 }

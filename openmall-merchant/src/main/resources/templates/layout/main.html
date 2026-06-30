@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:replace="${title}">商家后台 - OpenMall</title>
+    <title th:text="${title}">商家后台 - OpenMall</title>
     
     <!-- Bootstrap CSS -->
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
@@ -14,7 +14,7 @@
     <!-- 自定义CSS -->
     <link th:href="@{/css/admin.css}" rel="stylesheet">
     
-    <th:block th:replace="${css}" />
+<!--    <th:block th:if="${css != null}" th:replace="${css}" />-->
 </head>
 <body>
     <div class="wrapper">
@@ -86,7 +86,8 @@
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle"></i> <span th:text="${#authentication.principal.nickname}"></span>
+                                <i class="fas fa-user-circle"></i> 
+                                <span th:text="${#authentication?.principal?.username ?: '用户'}">用户</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> 个人中心</a></li>
@@ -112,6 +113,14 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <th:block th:replace="${js}" />
+    <th:block th:if="${js != null}" th:replace="${js}" />
+    
+    <script>
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+        });
+    </script>
 </body>
 </html>

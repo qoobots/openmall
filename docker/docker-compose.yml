@@ -1,0 +1,110 @@
+services:
+  # MySQL Database
+  mysql:
+    image: 3bpds0vd1gewcx06p4.xuanyuan.run/library/mysql:8.0
+    container_name: openmall-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: openmall
+      MYSQL_USER: openmall
+      MYSQL_PASSWORD: openmall123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - openmall-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis Cache
+  redis:
+    image: 3bpds0vd1gewcx06p4.xuanyuan.run/library/redis:7-alpine
+    container_name: openmall-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - openmall-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Portal Application
+  portal:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: openmall-portal
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - openmall-network
+    restart: unless-stopped
+
+  # Merchant Application
+  merchant:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.merchant
+    container_name: openmall-merchant
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - openmall-network
+    restart: unless-stopped
+
+  # Platform Application
+  platform:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.platform
+    container_name: openmall-platform
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - openmall-network
+    restart: unless-stopped
+
+networks:
+  openmall-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:

@@ -512,15 +512,15 @@
             <name>openmall Team</name>
             <email>team@qoobot.com</email>
             <organization>Qoobot</organization>
-            <organizationUrl>https://github.com/qoobot</organizationUrl>
+            <organizationUrl>https://github.com/qoobot-com</organizationUrl>
         </developer>
     </developers>
 
     <!-- SCM -->
     <scm>
-        <connection>scm:git:git://github.com/qoobot/openmall.git</connection>
+        <connection>scm:git:git://github.com/qoobot-com/openmall.git</connection>
         <developerConnection>scm:git:ssh://github.com:qoobot/openmall.git</developerConnection>
-        <url>https://github.com/qoobot/openmall/tree/main</url>
+        <url>https://github.com/qoobot-com/openmall/tree/main</url>
     </scm>
 
     <!-- Licenses -->

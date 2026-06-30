@@ -51,7 +51,7 @@ redis-server
 ### 2.1 克隆项目
 
 ```bash
-git clone https://github.com/qoobot/openmall.git
+git clone https://github.com/qoobot-com/openmall.git
 cd openmall
 ```
 

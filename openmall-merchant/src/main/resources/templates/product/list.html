@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})}">
+<head>
+    <title>商品管理 - 商家后台</title>
+    <link th:href="@{/css/product.css}" rel="stylesheet">
+</head>
+<body>
+    <main th:fragment="main-content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h3>商品管理</h3>
+                </div>
+            </div>
+            
+            <!-- 搜索和筛选 -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <form class="row g-3" th:action="@{/product/list}" method="get">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" name="keyword" 
+                                           placeholder="商品名称/编号" th:value="${keyword}">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" name="categoryId">
+                                        <option value="">全部分类</option>
+                                        <option th:each="category : ${categories}" 
+                                                th:value="${category.id}" 
+                                                th:text="${category.categoryName}"
+                                                th:selected="${categoryId == category.id}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" name="status">
+                                        <option value="">全部状态</option>
+                                        <option value="1" th:selected="${status == '1'}">已上架</option>
+                                        <option value="0" th:selected="${status == '0'}">已下架</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-search"></i> 搜索
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                        <i class="fas fa-undo"></i> 重置
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 工具栏 -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a th:href="@{/product/add}" class="btn btn-success me-2">
+                                <i class="fas fa-plus"></i> 发布商品
+                            </a>
+                            <button class="btn btn-info me-2" onclick="batchOperation('shelves')">
+                                <i class="fas fa-upload"></i> 批量上架
+                            </button>
+                            <button class="btn btn-warning me-2" onclick="batchOperation('unshelves')">
+                                <i class="fas fa-download"></i> 批量下架
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-danger" onclick="batchOperation('delete')">
+                                <i class="fas fa-trash"></i> 批量删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 商品列表 -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th width="50">
+                                                <input type="checkbox" id="checkAll" onchange="toggleCheckAll()">
+                                            </th>
+                                            <th>商品信息</th>
+                                            <th>价格</th>
+                                            <th>库存</th>
+                                            <th>销量</th>
+                                            <th>状态</th>
+                                            <th>创建时间</th>
+                                            <th width="150">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="product : ${page?.content}">
+                                            <td>
+                                                <input type="checkbox" name="productIds" th:value="${product.id}">
+                                            </td>
+                                            <td>
+                                                <div class="product-info">
+                                                    <img th:src="${product.mainImage}" alt="商品图片" class="product-image">
+                                                    <div>
+                                                        <div class="product-name" th:text="${product.productName}">商品名称</div>
+                                                        <div class="product-sku" th:text="${product.skuCount + '个规格'}">3个规格</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="product-price">
+                                                    <div th:text="'¥' + ${product.minPrice}">¥99.00</div>
+                                                    <div class="price-range" th:if="${product.maxPrice > product.minPrice}" 
+                                                         th:text="'~ ¥' + ${product.maxPrice}">~ ¥199.00</div>
+                                                </div>
+                                            </td>
+                                            <td th:text="${product.totalStock}">100</td>
+                                            <td th:text="${product.sales}">50</td>
+                                            <td>
+                                                <span class="badge" th:classappend="${product.isShelves ? 'bg-success' : 'bg-secondary'}" 
+                                                      th:text="${product.isShelves ? '已上架' : '已下架'}">已上架</span>
+                                            </td>
+                                            <td th:text="${#temporals.format(product.createTime, 'yyyy-MM-dd')}">2024-01-01</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a th:href="@{/product/edit/{id}(id=${product.id})}" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-outline-success" 
+                                                            th:if="${!product.isShelves}"
+                                                            th:data-id="${product.id}"
+                                                            onclick="changeShelves(this, 1)">
+                                                        <i class="fas fa-upload"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-warning" 
+                                                            th:if="${product.isShelves}"
+                                                            th:data-id="${product.id}"
+                                                            onclick="changeShelves(this, 0)">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                            th:data-id="${product.id}"
+                                                            onclick="deleteProduct(this)">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- 空状态 -->
+                            <div class="empty-state" th:if="${page?.content == null or page.content.isEmpty()}">
+                                <i class="fas fa-box-open"></i>
+                                <p>暂无商品</p>
+                                <a th:href="@{/product/add}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> 发布商品
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 分页 -->
+                    <div th:if="${page != null and page.totalPages > 1}" 
+                         th:replace="~{fragments/pagination :: pagination(page, ${'/product/list'})}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:fragment="script">
+    <script>
+        $(document).ready(function() {
+            console.log('商品管理页面加载完成');
+        });
+        
+        // 全选/取消全选
+        function toggleCheckAll() {
+            const checked = $('#checkAll').is(':checked');
+            $('input[name="productIds"]').prop('checked', checked);
+        }
+        
+        // 批量操作
+        function batchOperation(type) {
+            const productIds = [];
+            $('input[name="productIds"]:checked').each(function() {
+                productIds.push($(this).val());
+            });
+            
+            if (productIds.length === 0) {
+                errorAlert('提示', '请选择要操作的商品');
+                return;
+            }
+            
+            let confirmText = '';
+            let url = '';
+            let successMsg = '';
+            
+            switch(type) {
+                case 'shelves':
+                    confirmText = '确定要批量上架选中的 ' + productIds.length + ' 个商品吗？';
+                    url = '/product/batchShelves';
+                    successMsg = '批量上架成功';
+                    break;
+                case 'unshelves':
+                    confirmText = '确定要批量下架选中的 ' + productIds.length + ' 个商品吗？';
+                    url = '/product/batchUnshelves';
+                    successMsg = '批量下架成功';
+                    break;
+                case 'delete':
+                    confirmText = '确定要批量删除选中的 ' + productIds.length + ' 个商品吗？此操作不可恢复！';
+                    url = '/product/batchDelete';
+                    successMsg = '批量删除成功';
+                    break;
+                default:
+                    return;
+            }
+            
+            confirmDialog('批量操作', confirmText, function() {
+                showLoading();
+                ajaxRequest(url, 'POST', {productIds: productIds}, function(response) {
+                    hideLoading();
+                    successAlert('成功', successMsg);
+                    location.reload();
+                });
+            });
+        }
+        
+        // 修改上架状态
+        function changeShelves(btn, status) {
+            const productId = $(btn).data('id');
+            const action = status == 1 ? '上架' : '下架';
+            
+            confirmDialog(action + '商品', '确定要' + action + '该商品吗？', function() {
+                ajaxRequest('/product/changeShelves/' + productId + '/' + status, 'POST', null, function(response) {
+                    successAlert('成功', '商品已' + action);
+                    location.reload();
+                });
+            });
+        }
+        
+        // 删除商品
+        function deleteProduct(btn) {
+            const productId = $(btn).data('id');
+            
+            confirmDialog('删除商品', '确定要删除该商品吗？此操作不可恢复！', function() {
+                ajaxRequest('/product/delete/' + productId, 'DELETE', null, function(response) {
+                    successAlert('成功', '商品已删除');
+                    location.reload();
+                });
+            });
+        }
+        
+        // 重置表单
+        function resetForm() {
+            window.location.href = '/product/list';
+        }
+    </script>
+    </script>
+</body>
+</html>

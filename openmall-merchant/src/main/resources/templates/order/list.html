@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})}">
+<head>
+    <title>订单管理 - 商家后台</title>
+    <link th:href="@{/css/order.css}" rel="stylesheet">
+</head>
+<body>
+    <main th:fragment="main-content">
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h3>订单管理</h3>
+                </div>
+            </div>
+            
+            <!-- 统计卡片 -->
+            <div class="row stats-cards mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card pending-payment">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number" th:text="${statistics?.pendingPaymentCount ?: 0}">0</div>
+                        <div class="stat-label">待付款</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card pending-shipment">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-number" th:text="${statistics?.pendingShipmentCount ?: 0}">0</div>
+                        <div class="stat-label">待发货</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card shipped">
+                        <div class="stat-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="stat-number" th:text="${statistics?.shippedCount ?: 0}">0</div>
+                        <div class="stat-label">已发货</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card completed">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number" th:text="${statistics?.completedCount ?: 0}">0</div>
+                        <div class="stat-label">已完成</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 搜索和筛选 -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card search-filter-card">
+                        <div class="card-body">
+                            <form class="row g-3" th:action="@{/order/list}" method="get">
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control" name="keyword" 
+                                           placeholder="订单号/买家账号" th:value="${keyword}">
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" name="status">
+                                        <option value="">全部状态</option>
+                                        <option value="1" th:selected="${status == 1}">待付款</option>
+                                        <option value="2" th:selected="${status == 2}">待发货</option>
+                                        <option value="3" th:selected="${status == 3}">已发货</option>
+                                        <option value="4" th:selected="${status == 4}">已完成</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" name="startDate" 
+                                           th:value="${startDate}" placeholder="开始日期">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" name="endDate" 
+                                           th:value="${endDate}" placeholder="结束日期">
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-search"></i> 搜索
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                        <i class="fas fa-undo"></i> 重置
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 工具栏 -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="toolbar">
+                        <div>
+                            <button class="btn btn-success" onclick="batchShip()">
+                                <i class="fas fa-truck"></i> 批量发货
+                            </button>
+                        </div>
+                        <div class="text-muted">
+                            共 <span th:text="${page?.totalElements ?: 0}">0</span> 条记录
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 订单列表 -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div th:each="order : ${page?.content}" class="order-item">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="form-check">
+                                    <input class="form-check-input order-checkbox" type="checkbox" 
+                                           th:value="${order.id}" th:data-order-status="${order.orderStatus}"
+                                           onchange="updateBatchAction()">
+                                </div>
+                                <span>订单号：<strong th:text="${order.orderNo}">202401010001</strong></span>
+                                <span>买家：<strong th:text="${order.username}">买家账号</strong></span>
+                                <span>下单时间：<strong th:text="${#temporals.format(order.createTime, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</strong></span>
+                            </div>
+                            <div>
+                                <span class="badge" th:classappend="${order.statusBadge}" th:text="${order.statusText}">待付款</span>
+                            </div>
+                        </div>
+                        
+                        <div class="order-items">
+                            <div th:each="item : ${order.items}" class="order-product">
+                                <img th:src="${item.mainImage}" alt="商品图片" class="product-image">
+                                <div class="product-info">
+                                    <h6 th:text="${item.productName}">商品名称</h6>
+                                    <p th:text="${item.specs}">规格</p>
+                                </div>
+                                <div class="product-price">
+                                    <div class="price" th:text="'¥' + ${item.price}">¥99.00</div>
+                                    <div class="quantity">x <span th:text="${item.quantity}">1</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-footer">
+                            <div class="order-amount">
+                                <span>共 <strong th:text="${order.totalQuantity}">1</strong> 件商品</span>
+                                <span>实付金额：<strong class="total-amount" th:text="'¥' + ${order.payAmount}">¥99.00</strong></span>
+                            </div>
+                            <div class="order-actions">
+                                <button class="btn btn-sm btn-info" 
+                                        th:if="${order.orderStatus == 2}"
+                                        th:data-order-id="${order.id}"
+                                        th:data-order-no="${order.orderNo}"
+                                        onclick="openShipModal(this)">
+                                    <i class="fas fa-truck"></i> 发货
+                                </button>
+                                <a th:href="@{/order/detail/{id}(id=${order.id})}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> 详情
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 空状态 -->
+                    <div class="empty-state" th:if="${page?.content == null or page.content.isEmpty()}">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>暂无订单</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 分页 -->
+            <div th:if="${page != null and page.totalPages > 1}" 
+                 th:replace="~{fragments/pagination :: pagination(page, ${'/order/list'})}">
+            </div>
+        </div>
+        
+        <!-- 发货模态框 -->
+        <div class="modal fade" id="shipModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">订单发货</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="shipForm">
+                        <div class="modal-body">
+                            <input type="hidden" id="shipOrderId" name="orderId">
+                            <div class="mb-3">
+                                <label class="form-label">订单号</label>
+                                <input type="text" class="form-control" id="shipOrderNo" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">物流公司</label>
+                                <select class="form-select" name="logisticsCompany" required>
+                                    <option value="">请选择物流公司</option>
+                                    <option value="顺丰速运">顺丰速运</option>
+                                    <option value="中通快递">中通快递</option>
+                                    <option value="圆通快递">圆通快递</option>
+                                    <option value="申通快递">申通快递</option>
+                                    <option value="韵达快递">韵达快递</option>
+                                    <option value="邮政EMS">邮政EMS</option>
+                                    <option value="京东快递">京东快递</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">快递单号</label>
+                                <input type="text" class="form-control" name="logisticsNo" required 
+                                       placeholder="请输入快递单号">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary">确认发货</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:fragment="script">
+    <script>
+        $(document).ready(function() {
+            // 初始化表单提交
+            initShipForm();
+        });
+        
+        // 打开发货模态框
+        function openShipModal(btn) {
+            const orderId = $(btn).data('order-id');
+            const orderNo = $(btn).data('order-no');
+            
+            $('#shipOrderId').val(orderId);
+            $('#shipOrderNo').val(orderNo);
+            $('#shipModal').modal('show');
+        }
+        
+        // 初始化发货表单
+        function initShipForm() {
+            $('#shipForm').submit(function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    orderId: $('#shipOrderId').val(),
+                    logisticsCompany: $('select[name="logisticsCompany"]').val(),
+                    logisticsNo: $('input[name="logisticsNo"]').val()
+                };
+                
+                if (!formData.logisticsCompany || !formData.logisticsNo) {
+                    errorAlert('提示', '请填写完整的物流信息');
+                    return;
+                }
+                
+                showLoading();
+                
+                $.ajax({
+                    url: '/order/ship',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        hideLoading();
+                        if (response.code === 200) {
+                            successAlert('成功', '发货成功', function() {
+                                $('#shipModal').modal('hide');
+                                location.reload();
+                            });
+                        } else {
+                            errorAlert('失败', response.message || '发货失败');
+                        }
+                    },
+                    error: function() {
+                        hideLoading();
+                        errorAlert('错误', '请求失败，请稍后重试');
+                    }
+                });
+            });
+        }
+        
+        // 批量发货
+        function batchShip() {
+            // 获取选中的订单ID
+            const orderIds = [];
+            $('input[name="orderIds"]:checked').each(function() {
+                orderIds.push($(this).val());
+            });
+            
+            if (orderIds.length === 0) {
+                errorAlert('提示', '请选择要发货的订单');
+                return;
+            }
+            
+            // 这里可以实现批量发货逻辑
+            Swal.fire({
+                title: '批量发货',
+                text: `确定要为选中的 ${orderIds.length} 个订单发货吗？`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '确认发货',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading();
+                    
+                    $.ajax({
+                        url: '/order/batchShip',
+                        type: 'POST',
+                        data: {
+                            orderIds: orderIds.join(','),
+                            logisticsCompany: '批量发货物流公司',
+                            logisticsNo: '批量发货单号'
+                        },
+                        success: function(response) {
+                            hideLoading();
+                            if (response.code === 200) {
+                                successAlert('成功', '批量发货成功', function() {
+                                    location.reload();
+                                });
+                            } else {
+                                errorAlert('失败', response.message || '批量发货失败');
+                            }
+                        },
+                        error: function() {
+                            hideLoading();
+                            errorAlert('错误', '请求失败，请稍后重试');
+                        }
+                    });
+                }
+            });
+        }
+        
+        // 重置表单
+        function resetForm() {
+            window.location.href = '/order/list';
+        }
+        
+        // 模态框关闭时重置表单
+        $('#shipModal').on('hidden.bs.modal', function() {
+            $('#shipForm')[0].reset();
+        });
+    </script>
+</body>
+</html>

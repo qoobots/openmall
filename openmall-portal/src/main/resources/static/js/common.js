@@ -200,6 +200,17 @@ function debounce(func, delay) {
 // 页面加载完成后执行
 $(document).ready(function() {
     console.log('OpenMall loaded successfully');
+    
+    // 初始化工具提示
+    $('[data-bs-toggle="tooltip"]').tooltip();
+    
+    // 初始化弹出框
+    $('[data-bs-toggle="popover"]').popover();
+    
+    // 自动隐藏警告消息
+    setTimeout(function() {
+        $('.alert-auto-hide').fadeOut();
+    }, 3000);
 });
 
 // 页面滚动事件
@@ -216,3 +227,64 @@ $(window).scroll(function() {
 $('.back-to-top').click(function() {
     $('html, body').animate({scrollTop: 0}, 500);
 });
+
+// 通用表单提交
+function submitForm(formId, successCallback) {
+    const $form = $('#' + formId);
+    const formData = $form.serialize();
+    const url = $form.attr('action');
+    const method = $form.attr('method') || 'POST';
+    
+    showLoading();
+    $.ajax({
+        url: url,
+        type: method,
+        data: formData,
+        success: function(response) {
+            hideLoading();
+            if (response.code === 200) {
+                if (successCallback) {
+                    successCallback(response);
+                } else {
+                    successAlert('成功', response.message || '操作成功');
+                    setTimeout(() => location.reload(), 1500);
+                }
+            } else {
+                errorAlert('失败', response.message || '操作失败');
+            }
+        },
+        error: function() {
+            hideLoading();
+            errorAlert('错误', '请求失败，请稍后重试');
+        }
+    });
+}
+
+// 更新购物车数量
+function updateCartCount() {
+    $.get('/cart/count', function(response) {
+        if (response.code === 200) {
+            $('.cart-count').text(response.data).show();
+        }
+    });
+}
+
+// 格式化日期
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 格式化日期时间
+function formatDateTime(dateStr) {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+}

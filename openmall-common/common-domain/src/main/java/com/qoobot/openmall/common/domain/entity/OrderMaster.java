@@ -54,4 +54,19 @@ public class OrderMaster extends BaseEntity {
 
     @Column(name = "consignee_address", nullable = false, length = 500)
     private String consigneeAddress;
+
+    @Column(name = "logistics_company", length = 100)
+    private String logisticsCompany;
+
+    @Column(name = "logistics_no", length = 100)
+    private String logisticsNo;
+
+    @Column(name = "ship_time")
+    private LocalDateTime shipTime;
+
+    @Column(name = "receive_time")
+    private LocalDateTime receiveTime;
+
+    @Column(name = "remark", length = 500)
+    private String remark;
 }

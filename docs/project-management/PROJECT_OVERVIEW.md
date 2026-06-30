@@ -365,9 +365,9 @@ openmall-platform/
 
 ## 联系方式
 
-- 项目地址: https://github.com/qoobot/openmall
-- 文档地址: https://github.com/qoobot/openmall/wiki
-- 问题反馈: https://github.com/qoobot/openmall/issues
+- 项目地址: https://github.com/qoobot-com/openmall
+- 文档地址: https://github.com/qoobot-com/openmall/wiki
+- 问题反馈: https://github.com/qoobot-com/openmall/issues
 
 ## 许可证
 
