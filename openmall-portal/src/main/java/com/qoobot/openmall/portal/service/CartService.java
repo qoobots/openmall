@@ -47,6 +47,11 @@ public interface CartService {
     BigDecimal calculateSelectedAmount(Long userId);
 
     /**
+     * 批量删除选中商品
+     */
+    void batchDelete(Long userId, List<Long> skuIds);
+
+    /**
      * 清空购物车
      */
     void clearCart(Long userId);

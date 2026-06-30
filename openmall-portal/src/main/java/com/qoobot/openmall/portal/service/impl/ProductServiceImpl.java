@@ -189,11 +189,66 @@ public class ProductServiceImpl implements ProductService {
                 predicates.add(criteriaBuilder.like(root.get("productName"), "%" + query.getKeyword().trim() + "%"));
             }
 
+            // 价格区间筛选 - 通过SKU子查询
+            if (query.getMinPrice() != null && query.getMaxPrice() != null) {
+                // 查询在 minPrice 到 maxPrice 之间的SPU
+                List<Long> spuIds = queryPriceRangeSPUIds(query.getMinPrice(), query.getMaxPrice());
+                if (!spuIds.isEmpty()) {
+                    predicates.add(root.get("id").in(spuIds));
+                } else {
+                    // 没有匹配的价格区间，返回空
+                    predicates.add(criteriaBuilder.isNull(root.get("id")));
+                }
+            } else if (query.getMinPrice() != null) {
+                List<Long> spuIds = queryMinPriceSPUIds(query.getMinPrice());
+                if (!spuIds.isEmpty()) {
+                    predicates.add(root.get("id").in(spuIds));
+                } else {
+                    predicates.add(criteriaBuilder.isNull(root.get("id")));
+                }
+            } else if (query.getMaxPrice() != null) {
+                List<Long> spuIds = queryMaxPriceSPUIds(query.getMaxPrice());
+                if (!spuIds.isEmpty()) {
+                    predicates.add(root.get("id").in(spuIds));
+                } else {
+                    predicates.add(criteriaBuilder.isNull(root.get("id")));
+                }
+            }
+
             predicates.add(criteriaBuilder.equal(root.get("isDeleted"), 0));
             predicates.add(criteriaBuilder.equal(root.get("isShelves"), 1));
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    /**
+     * 查询价格区间内的SPU ID列表
+     */
+    private List<Long> queryPriceRangeSPUIds(BigDecimal minPrice, BigDecimal maxPrice) {
+        return productSkuRepository.findByIsDeleted(0).stream()
+                .filter(sku -> sku.getPrice() != null
+                        && sku.getPrice().compareTo(minPrice) >= 0
+                        && sku.getPrice().compareTo(maxPrice) <= 0)
+                .map(ProductSku::getSpuId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private List<Long> queryMinPriceSPUIds(BigDecimal minPrice) {
+        return productSkuRepository.findByIsDeleted(0).stream()
+                .filter(sku -> sku.getPrice() != null && sku.getPrice().compareTo(minPrice) >= 0)
+                .map(ProductSku::getSpuId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private List<Long> queryMaxPriceSPUIds(BigDecimal maxPrice) {
+        return productSkuRepository.findByIsDeleted(0).stream()
+                .filter(sku -> sku.getPrice() != null && sku.getPrice().compareTo(maxPrice) <= 0)
+                .map(ProductSku::getSpuId)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**

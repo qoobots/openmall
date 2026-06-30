@@ -11,7 +11,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 购物车控制器
@@ -117,6 +119,22 @@ public class CartController {
         Long userId = getUserId(session);
         cartService.clearCart(userId);
         return Result.success();
+    }
+
+    /**
+     * 批量删除选中商品
+     */
+    @DeleteMapping("/batch-delete")
+    @ResponseBody
+    public Result<Void> batchDelete(@RequestParam String skuIds, HttpSession session) {
+        Long userId = getUserId(session);
+        List<Long> idList = Arrays.stream(skuIds.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+        cartService.batchDelete(userId, idList);
+        return Result.success("已删除" + idList.size() + "件商品");
     }
 
     private Long getUserId(HttpSession session) {

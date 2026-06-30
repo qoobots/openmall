@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})">
+<head>
+    <title th:text="${shop.shopName} + ' - 店铺首页'">店铺首页</title>
+    <style th:fragment="head-link">
+        .shop-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 40px 0; }
+        .shop-logo { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; }
+        .carousel-item img { height: 300px; object-fit: cover; }
+        .product-card { border: 1px solid #eee; border-radius: 8px; overflow: hidden; transition: box-shadow 0.3s; }
+        .product-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .product-card .price { color: #e4393c; font-size: 1.1rem; font-weight: 600; }
+        .notice-item { padding: 8px 0; border-bottom: 1px dashed #eee; }
+    </style>
+</head>
+<body>
+    <main th:fragment="main-content">
+        <!-- 店铺头部 -->
+        <div class="shop-header mb-4" th:if="${shop != null}">
+            <div class="container">
+                <div class="d-flex align-items-center">
+                    <img th:src="${shop.shopLogo ?: '/images/shop-default.png'}" class="shop-logo me-3">
+                    <div>
+                        <h3 class="mb-1" th:text="${shop.shopName}">店铺名称</h3>
+                        <p class="mb-0 opacity-75" th:text="${shop.shopDesc}">店铺简介</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-9">
+                    <!-- 轮播图模块 -->
+                    <th:block th:if="${not #lists.isEmpty(modules)}">
+                        <div th:each="mod : ${modules}" th:if="${mod.isEnabled == 1}" class="mb-4">
+                            <!-- 轮播图 -->
+                            <th:block th:if="${mod.moduleType == 1}">
+                                <div id="carousel-mod" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <th:block th:with="config=${#strings.isEmpty(mod.moduleConfig) ? null : T(com.fasterxml.jackson.databind.ObjectMapper).newInstance().readTree(mod.moduleConfig)}">
+                                            <div class="carousel-item" th:each="img,iterStat : ${config?.get('images')}"
+                                                 th:classappend="${iterStat.first} ? 'active'">
+                                                <img th:src="${img.asText()}" class="d-block w-100" alt="轮播图">
+                                            </div>
+                                        </th:block>
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-mod" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-mod" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon"></span>
+                                    </button>
+                                </div>
+                            </th:block>
+
+                            <!-- 商品推荐 -->
+                            <th:block th:if="${mod.moduleType == 2}">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0" th:text="${mod.moduleName}">商品推荐</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row" th:with="config=${#strings.isEmpty(mod.moduleConfig) ? null : T(com.fasterxml.jackson.databind.ObjectMapper).newInstance().readTree(mod.moduleConfig)}">
+                                            <div class="col-6 col-md-3 mb-3" th:each="pid : ${config?.get('productIds')}">
+                                                <div class="product-card">
+                                                    <a th:href="@{/product/detail/{id}(id=${pid.asLong()})}">
+                                                        <img src="/images/placeholder.png" class="w-100" alt="商品">
+                                                    </a>
+                                                    <div class="p-2">
+                                                        <div class="text-truncate" th:text="${'商品 #' + pid.asText()}"></div>
+                                                        <span class="price">¥0.00</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th:block>
+
+                            <!-- 公告 -->
+                            <th:block th:if="${mod.moduleType == 3}">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i><span th:text="${mod.moduleName}">公告</span></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="notice-item" th:each="n : ${T(com.fasterxml.jackson.databind.ObjectMapper).newInstance().readTree(mod.moduleConfig)?.get('notices')}">
+                                            <i class="fas fa-volume-up text-warning me-2"></i>
+                                            <span th:text="${n.asText()}">公告内容</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th:block>
+
+                            <!-- 自定义 -->
+                            <th:block th:if="${mod.moduleType == 4}">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0" th:text="${mod.moduleName}">自定义模块</h5>
+                                    </div>
+                                    <div class="card-body" th:utext="${#strings.isEmpty(mod.moduleConfig) ? '' : T(com.fasterxml.jackson.databind.ObjectMapper).newInstance().readTree(mod.moduleConfig)?.get('htmlContent')?.asText()}">
+                                    </div>
+                                </div>
+                            </th:block>
+                        </div>
+                    </th:block>
+
+                    <div th:if="${#lists.isEmpty(modules)}" class="text-center py-5">
+                        <i class="fas fa-store fa-4x text-muted mb-3 d-block"></i>
+                        <h4 class="text-muted">店铺装修中，敬请期待</h4>
+                    </div>
+                </div>
+
+                <!-- 侧边栏 -->
+                <div class="col-md-3">
+                    <div class="card mb-3">
+                        <div class="card-header"><strong>店铺信息</strong></div>
+                        <div class="card-body">
+                            <p class="mb-1"><small class="text-muted">客服电话</small><br><strong th:text="${shop?.servicePhone ?: '400-000-0000'}">400-000-0000</strong></p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><strong>店铺商品</strong></div>
+                        <div class="list-group list-group-flush">
+                            <a th:href="@{/product/list(categoryId=1)}" class="list-group-item list-group-item-action">手机数码</a>
+                            <a th:href="@{/product/list(categoryId=2)}" class="list-group-item list-group-item-action">电脑办公</a>
+                            <a th:href="@{/product/list(categoryId=3)}" class="list-group-item list-group-item-action">家用电器</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:fragment="script"></script>
+</body>
+</html>

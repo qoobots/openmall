@@ -33,4 +33,9 @@ public interface ProductSpuRepository extends JpaRepository<ProductSpu, Long>, J
      * 统计店铺上架商品数量
      */
     long countByShopIdAndIsShelves(Long shopId, Integer isShelves);
+
+    /**
+     * 根据店铺ID查询所有未删除商品（按创建时间倒序）
+     */
+    java.util.List<ProductSpu> findByShopIdAndIsDeletedOrderByCreateTimeDesc(Long shopId, Integer isDeleted);
 }

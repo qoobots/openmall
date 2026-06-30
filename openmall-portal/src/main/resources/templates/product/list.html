@@ -24,12 +24,38 @@
                     <div class="filter-group">
                         <h5>分类</h5>
                         <ul class="list-unstyled">
-                            <li><a th:href="@{/product/list(categoryId=1)}">手机数码</a></li>
-                            <li><a th:href="@{/product/list(categoryId=2)}">电脑办公</a></li>
-                            <li><a th:href="@{/product/list(categoryId=3)}">家用电器</a></li>
-                            <li><a th:href="@{/product/list(categoryId=4)}">服饰鞋包</a></li>
-                            <li><a th:href="@{/product/list(categoryId=5)}">食品生鲜</a></li>
+                            <li><a th:href="@{/product/list(categoryId=1,minPrice=${minPrice},maxPrice=${maxPrice})}">手机数码</a></li>
+                            <li><a th:href="@{/product/list(categoryId=2,minPrice=${minPrice},maxPrice=${maxPrice})}">电脑办公</a></li>
+                            <li><a th:href="@{/product/list(categoryId=3,minPrice=${minPrice},maxPrice=${maxPrice})}">家用电器</a></li>
+                            <li><a th:href="@{/product/list(categoryId=4,minPrice=${minPrice},maxPrice=${maxPrice})}">服饰鞋包</a></li>
+                            <li><a th:href="@{/product/list(categoryId=5,minPrice=${minPrice},maxPrice=${maxPrice})}">食品生鲜</a></li>
                         </ul>
+                    </div>
+                    <div class="filter-group mt-3">
+                        <h5>品牌</h5>
+                        <ul class="list-unstyled">
+                            <li><a th:href="@{/product/list(brandId=1,categoryId=${categoryId},keyword=${keyword},sortBy=${sortBy},minPrice=${minPrice},maxPrice=${maxPrice})}">苹果</a></li>
+                            <li><a th:href="@{/product/list(brandId=2,categoryId=${categoryId},keyword=${keyword},sortBy=${sortBy},minPrice=${minPrice},maxPrice=${maxPrice})}">华为</a></li>
+                            <li><a th:href="@{/product/list(brandId=3,categoryId=${categoryId},keyword=${keyword},sortBy=${sortBy},minPrice=${minPrice},maxPrice=${maxPrice})}">小米</a></li>
+                        </ul>
+                    </div>
+                    <div class="filter-group mt-3">
+                        <h5>价格区间</h5>
+                        <form th:action="@{/product/list}" method="get" class="price-filter-form">
+                            <input type="hidden" name="categoryId" th:value="${categoryId}">
+                            <input type="hidden" name="brandId" th:value="${brandId}">
+                            <input type="hidden" name="keyword" th:value="${keyword}">
+                            <input type="hidden" name="sortBy" th:value="${sortBy}">
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text">¥</span>
+                                <input type="number" class="form-control" name="minPrice" placeholder="最低价" th:value="${minPrice}">
+                            </div>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text">¥</span>
+                                <input type="number" class="form-control" name="maxPrice" placeholder="最高价" th:value="${maxPrice}">
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-outline-primary w-100">筛选</button>
+                        </form>
                     </div>
                 </div>
             </div>

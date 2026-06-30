@@ -2,7 +2,9 @@ package com.qoobot.openmall.portal.controller;
 
 import com.qoobot.openmall.common.core.result.Result;
 import com.qoobot.openmall.portal.dto.OrderSubmitDTO;
+import com.qoobot.openmall.portal.service.LogisticsService;
 import com.qoobot.openmall.portal.service.OrderService;
+import com.qoobot.openmall.portal.service.PaymentService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PaymentService paymentService;
+    private final LogisticsService logisticsService;
 
     /**
      * 确认订单页
@@ -59,6 +63,37 @@ public class OrderController {
         model.addAttribute("orderNo", orderNo);
         model.addAttribute("order", orderService.getOrderByNo(orderNo));
         return "order/payment";
+    }
+
+    /**
+     * 创建支付单
+     */
+    @PostMapping("/order/create-payment")
+    @ResponseBody
+    public Result<Void> createPayment(@RequestParam String orderNo, @RequestParam Integer payType) {
+        paymentService.createPayment(orderNo, payType);
+        return Result.success("支付单创建成功");
+    }
+
+    /**
+     * 立即支付（模拟）
+     */
+    @PostMapping("/order/pay")
+    @ResponseBody
+    public Result<Void> pay(@RequestParam String orderNo, @RequestParam Integer payType) {
+        paymentService.pay(orderNo, payType);
+        return Result.success("支付成功");
+    }
+
+    /**
+     * 查看物流
+     */
+    @GetMapping("/order/logistics")
+    public String logistics(@RequestParam String orderNo, Model model) {
+        model.addAttribute("orderNo", orderNo);
+        model.addAttribute("tracking", logisticsService.queryTracking(orderNo));
+        model.addAttribute("trackNodes", logisticsService.getMockTrackNodes(orderNo));
+        return "order/logistics";
     }
 
     /**

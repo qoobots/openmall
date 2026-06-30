@@ -638,6 +638,58 @@ CREATE TABLE `visitor_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='访客记录表';
 
 -- ========================================
+-- 支付交易表
+-- ========================================
+
+DROP TABLE IF EXISTS `payment_transaction`;
+CREATE TABLE `payment_transaction` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `order_no` VARCHAR(32) NOT NULL COMMENT '订单号',
+    `pay_no` VARCHAR(64) NOT NULL UNIQUE COMMENT '支付流水号',
+    `pay_type` TINYINT NOT NULL COMMENT '支付方式（1：微信支付，2：支付宝，3：余额支付）',
+    `pay_amount` DECIMAL(10,2) NOT NULL COMMENT '支付金额',
+    `pay_status` TINYINT NOT NULL DEFAULT 0 COMMENT '支付状态（0：待支付，1：支付成功，2：支付失败，3：已退款）',
+    `pay_time` DATETIME COMMENT '支付完成时间',
+    `out_trade_no` VARCHAR(64) COMMENT '第三方支付订单号',
+    `buyer_name` VARCHAR(100) COMMENT '付款方名称',
+    `notify_data` TEXT COMMENT '支付回调原始数据',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_pay_order_no` (`order_no`),
+    INDEX `idx_pay_no` (`pay_no`),
+    INDEX `idx_pay_status` (`pay_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付交易表';
+
+-- ========================================
+-- 物流轨迹表
+-- ========================================
+
+DROP TABLE IF EXISTS `logistics_tracking`;
+CREATE TABLE `logistics_tracking` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `order_no` VARCHAR(32) NOT NULL COMMENT '订单号',
+    `logistics_no` VARCHAR(100) NOT NULL COMMENT '快递单号',
+    `logistics_company` VARCHAR(100) NOT NULL COMMENT '物流公司',
+    `current_status` VARCHAR(100) COMMENT '当前物流状态',
+    `track_detail` TEXT COMMENT '物流轨迹详情（JSON）',
+    `estimated_arrive` DATETIME COMMENT '预计到达时间',
+    `actual_arrive` DATETIME COMMENT '实际签收时间',
+    `last_query_time` DATETIME COMMENT '最后一次查询时间',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_lt_order_no` (`order_no`),
+    INDEX `idx_lt_logistics_no` (`logistics_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='物流轨迹表';
+
+-- ========================================
 -- 初始化测试数据
 -- ========================================
 

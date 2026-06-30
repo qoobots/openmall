@@ -23,4 +23,9 @@ public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
      * 根据ID查询
      */
     ProductSku findByIdAndIsDeleted(Long id, Integer isDeleted);
+
+    /**
+     * 查询所有未删除的SKU
+     */
+    List<ProductSku> findByIsDeleted(Integer isDeleted);
 }

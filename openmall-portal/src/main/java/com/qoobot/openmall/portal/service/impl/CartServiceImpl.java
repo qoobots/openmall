@@ -187,6 +187,15 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void batchDelete(Long userId, List<Long> skuIds) {
+        if (userId == null || skuIds == null || skuIds.isEmpty()) {
+            throw new IllegalArgumentException("参数不正确");
+        }
+        cartItemRepository.batchDeleteBySkuIds(userId, skuIds);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void clearCart(Long userId) {
         if (userId == null) {
             throw new IllegalArgumentException("用户ID不能为空");

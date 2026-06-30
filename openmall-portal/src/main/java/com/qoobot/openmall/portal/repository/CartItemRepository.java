@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import java.util.List;
+
 /**
  * 购物车Repository
  */
@@ -43,4 +45,11 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Modifying
     @Query("UPDATE CartItem c SET c.isDeleted = 1, c.updateBy = :userId WHERE c.userId = :userId AND c.isDeleted = 0")
     int batchDeleteByUserId(@Param("userId") Long userId);
+
+    /**
+     * 批量删除指定SKU的购物车项
+     */
+    @Modifying
+    @Query("UPDATE CartItem c SET c.isDeleted = 1, c.updateBy = :userId WHERE c.userId = :userId AND c.skuId IN :skuIds AND c.isDeleted = 0")
+    int batchDeleteBySkuIds(@Param("userId") Long userId, @Param("skuIds") List<Long> skuIds);
 }

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})">
+<head>
+    <title>订单支付 - OpenMall</title>
+    <style th:fragment="head-link">
+        .pay-container { max-width: 500px; margin: 0 auto; }
+        .pay-amount { font-size: 2.5rem; color: #e4393c; font-weight: 700; }
+        .pay-method { border: 2px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .pay-method:hover { border-color: #e4393c; }
+        .pay-method.active { border-color: #e4393c; background: #fff5f5; }
+        .pay-method .method-icon { width: 40px; height: 40px; }
+        .pay-timer { color: #e4393c; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <main th:fragment="main-content">
+        <div class="container py-5">
+            <nav class="mb-4"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">首页</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/order/list}">我的订单</a></li>
+                <li class="breadcrumb-item active">订单支付</li>
+            </ol></nav>
+
+            <div class="pay-container">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h5 class="mb-0"><i class="fas fa-credit-card"></i> 订单支付</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <p class="text-muted mb-1">订单号：<strong th:text="${orderNo}">-</strong></p>
+                            <div class="pay-amount mt-2" th:text="'¥' + ${order?.payAmount}">¥0.00</div>
+                        </div>
+
+                        <hr>
+
+                        <h6 class="mb-3">选择支付方式</h6>
+
+                        <div class="pay-method active" data-pay-type="1">
+                            <div class="d-flex align-items-center">
+                                <span class="method-icon me-3 d-flex align-items-center justify-content-center bg-success text-white rounded-circle" style="width:40px;height:40px;">
+                                    <i class="fab fa-weixin"></i>
+                                </span>
+                                <div>
+                                    <strong>微信支付</strong>
+                                    <small class="d-block text-muted">推荐微信用户使用</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pay-method" data-pay-type="2">
+                            <div class="d-flex align-items-center">
+                                <span class="method-icon me-3 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle" style="width:40px;height:40px;">
+                                    <i class="fab fa-alipay"></i>
+                                </span>
+                                <div>
+                                    <strong>支付宝</strong>
+                                    <small class="d-block text-muted">推荐支付宝用户使用</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pay-method" data-pay-type="3">
+                            <div class="d-flex align-items-center">
+                                <span class="method-icon me-3 d-flex align-items-center justify-content-center bg-warning text-white rounded-circle" style="width:40px;height:40px;">
+                                    <i class="fas fa-wallet"></i>
+                                </span>
+                                <div>
+                                    <strong>余额支付</strong>
+                                    <small class="d-block text-muted">使用账户余额支付</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="button" class="btn btn-danger btn-lg" onclick="confirmPay()" id="payBtn">
+                                <i class="fas fa-check-circle"></i> 立即支付
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <small class="text-muted">支付剩余时间：<span class="pay-timer" id="countdown">30:00</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:fragment="script">
+    <script>
+        let selectedPayType = 1;
+
+        $(function() {
+            $('.pay-method').click(function() {
+                $('.pay-method').removeClass('active');
+                $(this).addClass('active');
+                selectedPayType = $(this).data('pay-type');
+            });
+
+            // 倒计时
+            let seconds = 30 * 60;
+            let timer = setInterval(function() {
+                seconds--;
+                if (seconds <= 0) { clearInterval(timer); location.href = '/order/list'; return; }
+                let m = Math.floor(seconds / 60);
+                let s = seconds % 60;
+                $('#countdown').text(m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0'));
+            }, 1000);
+        });
+
+        function confirmPay() {
+            const orderNo = [[${orderNo}]];
+            $('#payBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 支付处理中...');
+
+            $.ajax({
+                url: '/order/pay',
+                type: 'POST',
+                data: { orderNo: orderNo, payType: selectedPayType },
+                success: function(res) {
+                    if (res.code === 200) {
+                        Swal.fire({ icon: 'success', title: '支付成功!', text: '请等待商家发货', timer: 2000, showConfirmButton: false })
+                            .then(() => location.href = '/order/list');
+                    } else {
+                        Swal.fire({ icon: 'error', title: '支付失败', text: res.message || '请稍后重试' });
+                        $('#payBtn').prop('disabled', false).html('<i class="fas fa-check-circle"></i> 立即支付');
+                    }
+                },
+                error: function() {
+                    Swal.fire({ icon: 'error', title: '支付失败', text: '网络错误，请稍后重试' });
+                    $('#payBtn').prop('disabled', false).html('<i class="fas fa-check-circle"></i> 立即支付');
+                }
+            });
+        }
+    </script>
+    </script>
+</body>
+</html>

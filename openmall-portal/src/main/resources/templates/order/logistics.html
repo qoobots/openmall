@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/main :: main(~{::title}, ~{::head-link}, ~{::main-content}, ~{::script})">
+<head>
+    <title>物流追踪 - OpenMall</title>
+    <style th:fragment="head-link">
+        .logistics-container { max-width: 700px; margin: 0 auto; }
+        .track-timeline { position: relative; padding-left: 30px; }
+        .track-timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: #e0e0e0; }
+        .track-node { position: relative; padding: 12px 0; }
+        .track-node::before { content: ''; position: absolute; left: -24px; top: 16px; width: 10px; height: 10px; border-radius: 50%; background: #ccc; border: 2px solid #fff; box-shadow: 0 0 0 2px #ccc; }
+        .track-node.active::before { background: #28a745; box-shadow: 0 0 0 2px #28a745; }
+        .track-node.latest::before { background: #007bff; box-shadow: 0 0 0 2px #007bff; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100% { box-shadow: 0 0 0 2px #007bff; } 50% { box-shadow: 0 0 0 6px rgba(0,123,255,0.3); } }
+        .track-time { font-size: 0.85rem; color: #999; }
+        .track-desc { font-size: 0.95rem; margin-top: 2px; }
+    </style>
+</head>
+<body>
+    <main th:fragment="main-content">
+        <div class="container py-4">
+            <nav class="mb-4"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">首页</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/order/list}">我的订单</a></li>
+                <li class="breadcrumb-item active">物流追踪</li>
+            </ol></nav>
+
+            <div class="logistics-container" th:if="${tracking != null}">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-truck"></i> 物流信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted d-block">物流公司</small>
+                                <strong th:text="${tracking.logisticsCompany}">-</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">快递单号</small>
+                                <strong th:text="${tracking.logisticsNo}">-</strong>
+                            </div>
+                            <div class="col-6 mt-3">
+                                <small class="text-muted d-block">当前状态</small>
+                                <strong class="text-primary" th:text="${tracking.currentStatus}">-</strong>
+                            </div>
+                            <div class="col-6 mt-3">
+                                <small class="text-muted d-block">预计到达</small>
+                                <strong th:text="${#temporals.format(tracking.estimatedArrive, 'yyyy-MM-dd')}">-</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> 物流轨迹</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="track-timeline" th:if="${not #lists.isEmpty(trackNodes)}">
+                            <div class="track-node" th:each="node,iterStat : ${trackNodes}"
+                                 th:classappend="${iterStat.last} ? 'latest' : (${iterStat.first} ? 'active' : 'active')">
+                                <div class="track-time" th:text="${#temporals.format(tracking.updateTime, 'yyyy-MM-dd HH:mm')}">-</div>
+                                <div class="track-desc" th:text="${node}">轨迹描述</div>
+                            </div>
+                        </div>
+                        <div th:unless="${not #lists.isEmpty(trackNodes)}" class="text-center py-4 text-muted">
+                            <i class="fas fa-box-open fa-3x mb-3 d-block"></i>
+                            暂无物流信息
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center py-5" th:unless="${tracking != null}">
+                <i class="fas fa-truck fa-4x text-muted mb-3 d-block"></i>
+                <h4 class="text-muted">暂无物流信息</h4>
+                <p class="text-muted">商家发货后，可在此查看物流轨迹</p>
+            </div>
+        </div>
+    </main>
+
+    <script th:fragment="script"></script>
+</body>
+</html>

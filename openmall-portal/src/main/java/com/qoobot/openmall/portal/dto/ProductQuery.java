@@ -2,6 +2,8 @@ package com.qoobot.openmall.portal.dto;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * 商品查询DTO
  *
@@ -24,6 +26,16 @@ public class ProductQuery {
      * 关键词
      */
     private String keyword;
+
+    /**
+     * 最低价格
+     */
+    private BigDecimal minPrice;
+
+    /**
+     * 最高价格
+     */
+    private BigDecimal maxPrice;
 
     /**
      * 排序方式

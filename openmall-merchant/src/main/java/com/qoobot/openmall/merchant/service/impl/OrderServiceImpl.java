@@ -1,5 +1,7 @@
 package com.qoobot.openmall.merchant.service.impl;
 
+import cn.hutool.json.JSONUtil;
+import com.qoobot.openmall.common.domain.entity.LogisticsTracking;
 import com.qoobot.openmall.common.domain.entity.OrderItem;
 import com.qoobot.openmall.common.domain.entity.OrderMaster;
 import com.qoobot.openmall.common.domain.entity.ProductSku;
@@ -7,6 +9,7 @@ import com.qoobot.openmall.common.domain.entity.ProductSpu;
 import com.qoobot.openmall.merchant.dto.OrderItemVO;
 import com.qoobot.openmall.merchant.dto.OrderVO;
 import com.qoobot.openmall.merchant.dto.PageResult;
+import com.qoobot.openmall.merchant.repository.LogisticsTrackingRepository;
 import com.qoobot.openmall.merchant.repository.OrderItemRepository;
 import com.qoobot.openmall.merchant.repository.OrderRepository;
 import com.qoobot.openmall.merchant.repository.ProductSkuRepository;
@@ -40,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductSkuRepository productSkuRepository;
     private final ProductSpuRepository productSpuRepository;
+    private final LogisticsTrackingRepository logisticsTrackingRepository;
 
     @Override
     public PageResult<OrderVO> queryPage(Integer status, String keyword, Pageable pageable, Long shopId) {
@@ -135,6 +139,39 @@ public class OrderServiceImpl implements OrderService {
         order.setUpdateBy(shopId); // TODO: 修改为当前用户ID
 
         orderRepository.save(order);
+
+        // 自动创建物流追踪记录
+        createLogisticsTracking(order.getOrderNo(), logisticsCompany, logisticsNo);
+    }
+
+    /**
+     * 创建物流追踪记录
+     */
+    private void createLogisticsTracking(String orderNo, String logisticsCompany, String logisticsNo) {
+        LogisticsTracking tracking = logisticsTrackingRepository.findByOrderNo(orderNo)
+                .orElse(new LogisticsTracking());
+
+        java.util.List<String> trackNodes = java.util.Arrays.asList(
+                "【" + logisticsCompany + "】已揽收",
+                "【" + logisticsCompany + "】快件已到达分拨中心",
+                "【" + logisticsCompany + "】快件已从分拨中心发出",
+                "【" + logisticsCompany + "】快件正运往目的地",
+                "【" + logisticsCompany + "】快件已到达目的地分拨中心",
+                "【" + logisticsCompany + "】快件正在派送中",
+                "【" + logisticsCompany + "】快件已签收"
+        );
+
+        tracking.setOrderNo(orderNo);
+        tracking.setLogisticsNo(logisticsNo);
+        tracking.setLogisticsCompany(logisticsCompany);
+        tracking.setCurrentStatus("运输中");
+        tracking.setTrackDetail(JSONUtil.toJsonStr(trackNodes));
+        tracking.setEstimatedArrive(LocalDateTime.now().plusDays(3));
+        tracking.setLastQueryTime(LocalDateTime.now());
+        tracking.setCreateBy(1L);
+        tracking.setUpdateBy(1L);
+
+        logisticsTrackingRepository.save(tracking);
     }
 
     @Transactional

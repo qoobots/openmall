@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
+
 /**
  * 商品控制器
  *
@@ -30,6 +32,8 @@ public class ProductController {
     public String list(@RequestParam(required = false) Long categoryId,
                       @RequestParam(required = false) Long brandId,
                       @RequestParam(required = false) String keyword,
+                      @RequestParam(required = false) BigDecimal minPrice,
+                      @RequestParam(required = false) BigDecimal maxPrice,
                       @RequestParam(required = false) String sortBy,
                       @RequestParam(defaultValue = "1") Integer pageNum,
                       @RequestParam(defaultValue = "20") Integer pageSize,
@@ -39,6 +43,8 @@ public class ProductController {
         query.setCategoryId(categoryId);
         query.setBrandId(brandId);
         query.setKeyword(keyword);
+        query.setMinPrice(minPrice);
+        query.setMaxPrice(maxPrice);
         query.setSortBy(sortBy);
         query.setPageNum(pageNum);
         query.setPageSize(pageSize);
@@ -48,6 +54,8 @@ public class ProductController {
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("brandId", brandId);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
         model.addAttribute("sortBy", sortBy);
 
         return "product/list";
