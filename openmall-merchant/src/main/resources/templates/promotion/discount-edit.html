@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${entity.id == null} ? '新增限时折扣' : '编辑限时折扣'">限时折扣编辑</title>
+    <link rel="stylesheet" href="/merchant/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2 th:text="${entity.id == null} ? '新增限时折扣' : '编辑限时折扣'"></h2>
+    <form id="editForm" class="form">
+        <input type="hidden" name="id" th:value="${entity.id}">
+        <div class="form-group">
+            <label>活动名称</label>
+            <input type="text" name="promotionName" class="form-control" th:value="${entity.promotionName}" required>
+        </div>
+        <div class="form-group">
+            <label>商品SPU ID</label>
+            <input type="number" name="spuId" class="form-control" th:value="${entity.spuId}" required>
+        </div>
+        <div class="form-group">
+            <label>SKU ID（留空适用所有SKU）</label>
+            <input type="number" name="skuId" class="form-control" th:value="${entity.skuId}">
+        </div>
+        <div class="form-group">
+            <label>折扣价格（元）</label>
+            <input type="number" step="0.01" name="discountPrice" class="form-control" th:value="${entity.discountPrice}" required>
+        </div>
+        <div class="form-group">
+            <label>限购数量（0不限）</label>
+            <input type="number" name="discountLimit" class="form-control" th:value="${entity.discountLimit}">
+        </div>
+        <div class="form-group">
+            <label>活动库存</label>
+            <input type="number" name="totalStock" class="form-control" th:value="${entity.totalStock}" required>
+        </div>
+        <div class="form-group">
+            <label>开始时间</label>
+            <input type="datetime-local" name="startTime" class="form-control" th:value="${entity.startTime}" required>
+        </div>
+        <div class="form-group">
+            <label>结束时间</label>
+            <input type="datetime-local" name="endTime" class="form-control" th:value="${entity.endTime}" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="/merchant/promotion/discount" class="btn btn-secondary">返回</a>
+        </div>
+    </form>
+</div>
+<script>
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(this));
+    const isNew = !data.id;
+    const url = isNew ? '/merchant/promotion/discount/save' : '/merchant/promotion/discount/update';
+    const method = isNew ? 'POST' : 'PUT';
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+        alert(d.message);
+        if (d.code === 200) location.href = '/merchant/promotion/discount';
+    });
+});
+</script>
+</body>
+</html>

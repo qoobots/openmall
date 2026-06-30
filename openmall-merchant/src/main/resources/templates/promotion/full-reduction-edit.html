@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${entity.id == null} ? '新增满减活动' : '编辑满减活动'">满减活动编辑</title>
+    <link rel="stylesheet" href="/merchant/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2 th:text="${entity.id == null} ? '新增满减活动' : '编辑满减活动'"></h2>
+    <form id="editForm" class="form">
+        <input type="hidden" name="id" th:value="${entity.id}">
+        <div class="form-group">
+            <label>活动名称</label>
+            <input type="text" name="promotionName" class="form-control" th:value="${entity.promotionName}" required>
+        </div>
+        <div class="form-group">
+            <label>满金额（元）</label>
+            <input type="number" step="0.01" name="fullAmount" class="form-control" th:value="${entity.fullAmount}" required>
+        </div>
+        <div class="form-group">
+            <label>减金额（元）</label>
+            <input type="number" step="0.01" name="reduceAmount" class="form-control" th:value="${entity.reduceAmount}" required>
+        </div>
+        <div class="form-group">
+            <label>开始时间</label>
+            <input type="datetime-local" name="startTime" class="form-control" th:value="${entity.startTime}" required>
+        </div>
+        <div class="form-group">
+            <label>结束时间</label>
+            <input type="datetime-local" name="endTime" class="form-control" th:value="${entity.endTime}" required>
+        </div>
+        <div class="form-group">
+            <label>适用商品ID（逗号分隔，留空表示全场通用）</label>
+            <input type="text" name="productIds" class="form-control" th:value="${entity.productIds}">
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="/merchant/promotion/full-reduction" class="btn btn-secondary">返回</a>
+        </div>
+    </form>
+</div>
+<script>
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(this));
+    const isNew = !data.id;
+    const url = isNew ? '/merchant/promotion/full-reduction/save' : '/merchant/promotion/full-reduction/update';
+    const method = isNew ? 'POST' : 'PUT';
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+        alert(d.message);
+        if (d.code === 200) location.href = '/merchant/promotion/full-reduction';
+    });
+});
+</script>
+</body>
+</html>

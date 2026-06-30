@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>我的评价 - OpenMall</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .review-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .stars { color: #ff9900; font-size: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>我的评价</h3>
+    <div class="review-list">
+        <div th:if="${page.records == null || page.records.isEmpty()}">
+            <p style="text-align:center;padding:40px;">暂无评价记录</p>
+        </div>
+        <div class="review-item" th:each="item : ${page.records}">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <span class="stars">
+                        <span th:each="i : ${#numbers.sequence(1, item.rating)}">★</span>
+                        <span th:each="i : ${#numbers.sequence(1, 5 - item.rating)}" style="color:#ccc;">★</span>
+                    </span>
+                    <small th:text="${#temporals.format(item.createTime, 'yyyy-MM-dd HH:mm')}"></small>
+                </div>
+            </div>
+            <p th:text="${item.content}" style="margin:8px 0;"></p>
+            <div class="reply-box" style="background:#f5f5f5;padding:10px;border-radius:4px;" th:if="${item.replyContent != null}">
+                <strong>商家回复：</strong><span th:text="${item.replyContent}"></span>
+            </div>
+        </div>
+    </div>
+    <div class="pagination" th:if="${page.totalPages > 1}">
+        <span>第 <span th:text="${page.pageNum}"></span> / <span th:text="${page.totalPages}"></span> 页，共 <span th:text="${page.total}"></span> 条</span>
+    </div>
+</div>
+</body>
+</html>

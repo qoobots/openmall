@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>绑定手机号 - OpenMall</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .sms-btn { padding: 8px 16px; cursor: pointer; }
+        .sms-btn:disabled { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>绑定手机号</h3>
+    <form id="bindForm" class="form">
+        <div class="form-group">
+            <label>手机号</label>
+            <input type="text" name="mobile" class="form-control" placeholder="请输入手机号" pattern="^1[3-9]\d{9}$" required>
+        </div>
+        <div class="form-group">
+            <label>验证码</label>
+            <div style="display:flex;gap:10px;">
+                <input type="text" name="code" class="form-control" placeholder="请输入验证码" required>
+                <button type="button" id="sendSmsBtn" class="sms-btn btn btn-secondary" onclick="sendSms()">获取验证码</button>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">确认绑定</button>
+        </div>
+    </form>
+</div>
+<script>
+let countdown = 0;
+function sendSms() {
+    const mobile = document.querySelector('[name=mobile]').value;
+    if (!mobile || !/^1[3-9]\d{9}$/.test(mobile)) {
+        alert('请输入正确的手机号'); return;
+    }
+    fetch('/user/send-sms', { method: 'POST', body: new URLSearchParams({ mobile }) })
+        .then(r => r.json()).then(d => {
+            alert(d.message);
+            if (d.code === 200) startCountdown();
+        });
+}
+function startCountdown() {
+    const btn = document.getElementById('sendSmsBtn');
+    countdown = 60;
+    btn.disabled = true;
+    const timer = setInterval(() => {
+        countdown--;
+        btn.textContent = countdown + 's后重发';
+        if (countdown <= 0) { clearInterval(timer); btn.disabled = false; btn.textContent = '获取验证码'; }
+    }, 1000);
+}
+document.getElementById('bindForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    fetch('/user/bind-mobile', { method: 'POST', body: new FormData(this) })
+        .then(r => r.json()).then(d => {
+            alert(d.message);
+            if (d.code === 200) location.href = '/user/profile';
+        });
+});
+</script>
+</body>
+</html>

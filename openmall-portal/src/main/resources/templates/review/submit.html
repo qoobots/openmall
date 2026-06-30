@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>提交评价 - OpenMall</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .star-rating { display: flex; gap: 5px; font-size: 28px; cursor: pointer; }
+        .star-rating span { color: #ddd; transition: color 0.2s; }
+        .star-rating span.active { color: #ff9900; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>提交评价</h3>
+    <form id="reviewForm" class="form">
+        <input type="hidden" name="orderNo" th:value="${orderNo}">
+        <input type="hidden" name="spuId" th:value="${spuId}">
+        <input type="hidden" name="skuId" th:value="${skuId}">
+        <div class="form-group">
+            <label>评分</label>
+            <div class="star-rating" id="starRating">
+                <span onclick="setRating(1)">★</span>
+                <span onclick="setRating(2)">★</span>
+                <span onclick="setRating(3)">★</span>
+                <span onclick="setRating(4)">★</span>
+                <span onclick="setRating(5)">★</span>
+            </div>
+            <input type="hidden" name="rating" id="ratingValue" value="5">
+        </div>
+        <div class="form-group">
+            <label>评价内容</label>
+            <textarea name="content" class="form-control" rows="4" placeholder="分享您的购物体验..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="isAnonymous" value="1"> 匿名评价
+            </label>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">提交评价</button>
+        </div>
+    </form>
+</div>
+<script>
+function setRating(r) {
+    document.getElementById('ratingValue').value = r;
+    document.querySelectorAll('#starRating span').forEach((s, i) => {
+        s.classList.toggle('active', i < r);
+    });
+}
+document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const data = new FormData(this);
+    fetch('/review/submit', {
+        method: 'POST',
+        body: new URLSearchParams(data)
+    }).then(r => r.json()).then(d => {
+        alert(d.message);
+        if (d.code === 200) history.back();
+    });
+});
+setRating(5);
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>店铺装修 - 商家后台</title>
+    <link rel="stylesheet" href="/merchant/css/style.css">
+    <style>
+        .module-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 6px; background: #fff; }
+        .module-card h4 { margin: 0 0 10px 0; }
+        .module-type-1 { border-left: 4px solid #007bff; }
+        .module-type-2 { border-left: 4px solid #28a745; }
+        .module-type-3 { border-left: 4px solid #ffc107; }
+        .module-type-4 { border-left: 4px solid #6c757d; }
+        .sort-input { width: 60px; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>店铺装修</h2>
+    <div class="toolbar">
+        <a href="/merchant/decoration/add" class="btn btn-primary">新增模块</a>
+    </div>
+    <div id="moduleList">
+        <div class="module-card" th:each="item : ${modules}"
+             th:classappend="'module-type-' + ${item.moduleType}">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <h4>
+                        <span th:if="${item.moduleType == 1}">[轮播图]</span>
+                        <span th:if="${item.moduleType == 2}">[商品推荐]</span>
+                        <span th:if="${item.moduleType == 3}">[公告]</span>
+                        <span th:if="${item.moduleType == 4}">[自定义]</span>
+                        <span th:text="${item.moduleName}"></span>
+                    </h4>
+                    <small>
+                        排序: <input type="number" class="sort-input" th:value="${item.sortOrder}"
+                                onchange="updateSort(${item.id}, this.value)">
+                        <span th:if="${item.isEnabled == 1}" class="badge badge-success">启用</span>
+                        <span th:if="${item.isEnabled == 0}" class="badge badge-secondary">停用</span>
+                    </small>
+                </div>
+                <div>
+                    <a th:href="@{/merchant/decoration/edit/{id}(id=${item.id})}" class="btn btn-sm">编辑</a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function updateSort(id, sortOrder) {
+    fetch('/merchant/decoration/sort/' + id + '?sortOrder=' + sortOrder, { method: 'POST' })
+        .then(r => r.json()).then(d => { if (d.code !== 200) alert(d.message); });
+}
+function deleteItem(id) {
+    if (confirm('确定删除该模块吗？')) {
+        fetch('/merchant/decoration/delete/' + id, { method: 'DELETE' })
+            .then(r => r.json()).then(d => { alert(d.message); location.reload(); });
+    }
+}
+</script>
+</body>
+</html>

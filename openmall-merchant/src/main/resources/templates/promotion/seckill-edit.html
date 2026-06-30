@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${entity.id == null} ? '新增秒杀活动' : '编辑秒杀活动'">秒杀活动编辑</title>
+    <link rel="stylesheet" href="/merchant/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2 th:text="${entity.id == null} ? '新增秒杀活动' : '编辑秒杀活动'"></h2>
+    <form id="editForm" class="form">
+        <input type="hidden" name="id" th:value="${entity.id}">
+        <div class="form-group">
+            <label>活动名称</label>
+            <input type="text" name="promotionName" class="form-control" th:value="${entity.promotionName}" required>
+        </div>
+        <div class="form-group">
+            <label>SKU ID</label>
+            <input type="number" name="skuId" class="form-control" th:value="${entity.skuId}" required>
+        </div>
+        <div class="form-group">
+            <label>秒杀价格（元）</label>
+            <input type="number" step="0.01" name="seckillPrice" class="form-control" th:value="${entity.seckillPrice}" required>
+        </div>
+        <div class="form-group">
+            <label>秒杀库存</label>
+            <input type="number" name="seckillStock" class="form-control" th:value="${entity.seckillStock}" required>
+        </div>
+        <div class="form-group">
+            <label>每人限购数量</label>
+            <input type="number" name="limitCount" class="form-control" th:value="${entity.limitCount}" required>
+        </div>
+        <div class="form-group">
+            <label>开始时间</label>
+            <input type="datetime-local" name="startTime" class="form-control" th:value="${entity.startTime}" required>
+        </div>
+        <div class="form-group">
+            <label>结束时间</label>
+            <input type="datetime-local" name="endTime" class="form-control" th:value="${entity.endTime}" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="/merchant/promotion/seckill" class="btn btn-secondary">返回</a>
+        </div>
+    </form>
+</div>
+<script>
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(this));
+    const isNew = !data.id;
+    const url = isNew ? '/merchant/promotion/seckill/save' : '/merchant/promotion/seckill/update';
+    const method = isNew ? 'POST' : 'PUT';
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+        alert(d.message);
+        if (d.code === 200) location.href = '/merchant/promotion/seckill';
+    });
+});
+</script>
+</body>
+</html>

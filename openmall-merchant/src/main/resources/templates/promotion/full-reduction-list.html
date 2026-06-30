@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>满减活动 - 商家后台</title>
+    <link rel="stylesheet" href="/merchant/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>满减活动管理</h2>
+    <div class="toolbar">
+        <a href="/merchant/promotion/full-reduction/add" class="btn btn-primary">新增满减活动</a>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>活动名称</th>
+                <th>满金额</th>
+                <th>减金额</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${page.records}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.promotionName}"></td>
+                <td th:text="${item.fullAmount}"></td>
+                <td th:text="${item.reduceAmount}"></td>
+                <td th:text="${item.startTime}"></td>
+                <td th:text="${item.endTime}"></td>
+                <td>
+                    <span th:if="${item.status == 0}" class="badge badge-info">未开始</span>
+                    <span th:if="${item.status == 1}" class="badge badge-success">进行中</span>
+                    <span th:if="${item.status == 2}" class="badge badge-secondary">已结束</span>
+                </td>
+                <td>
+                    <a th:href="@{/merchant/promotion/full-reduction/edit/{id}(id=${item.id})}" class="btn btn-sm">编辑</a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span>第 <span th:text="${page.pageNum}"></span> / <span th:text="${page.totalPages}"></span> 页，共 <span th:text="${page.total}"></span> 条</span>
+    </div>
+</div>
+<script>
+function deleteItem(id) {
+    if (confirm('确定删除该满减活动吗？')) {
+        fetch('/merchant/promotion/full-reduction/delete/' + id, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(d => { alert(d.message); location.reload(); });
+    }
+}
+</script>
+</body>
+</html>

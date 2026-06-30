@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${entity.id == null} ? '新增页面模块' : '编辑页面模块'">店铺装修编辑</title>
+    <link rel="stylesheet" href="/merchant/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2 th:text="${entity.id == null} ? '新增页面模块' : '编辑页面模块'"></h2>
+    <form id="editForm" class="form">
+        <input type="hidden" name="id" th:value="${entity.id}">
+        <div class="form-group">
+            <label>模块名称</label>
+            <input type="text" name="moduleName" class="form-control" th:value="${entity.moduleName}" required>
+        </div>
+        <div class="form-group">
+            <label>模块类型</label>
+            <select name="moduleType" class="form-control" required>
+                <option value="1" th:selected="${entity.moduleType == 1}">轮播图</option>
+                <option value="2" th:selected="${entity.moduleType == 2}">商品推荐</option>
+                <option value="3" th:selected="${entity.moduleType == 3}">公告</option>
+                <option value="4" th:selected="${entity.moduleType == 4}">自定义</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>模块配置（JSON格式）</label>
+            <textarea name="moduleConfig" class="form-control" rows="5" th:text="${entity.moduleConfig}"></textarea>
+        </div>
+        <div class="form-group">
+            <label>排序</label>
+            <input type="number" name="sortOrder" class="form-control" th:value="${entity.sortOrder}">
+        </div>
+        <div class="form-group">
+            <label>是否启用</label>
+            <select name="isEnabled" class="form-control">
+                <option value="1" th:selected="${entity.isEnabled == 1}">启用</option>
+                <option value="0" th:selected="${entity.isEnabled == 0}">停用</option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="/merchant/decoration" class="btn btn-secondary">返回</a>
+        </div>
+    </form>
+</div>
+<script>
+document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(this));
+    const isNew = !data.id;
+    const url = isNew ? '/merchant/decoration/save' : '/merchant/decoration/update';
+    const method = isNew ? 'POST' : 'PUT';
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+        alert(d.message);
+        if (d.code === 200) location.href = '/merchant/decoration';
+    });
+});
+</script>
+</body>
+</html>

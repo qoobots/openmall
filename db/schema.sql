@@ -484,6 +484,160 @@ CREATE TABLE `stock_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存出入库记录表';
 
 -- ========================================
+-- 营销活动相关表
+-- ========================================
+
+-- 满减活动表
+DROP TABLE IF EXISTS `promotion_full_reduction`;
+CREATE TABLE `promotion_full_reduction` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `shop_id` BIGINT NOT NULL COMMENT '店铺ID',
+    `promotion_name` VARCHAR(100) NOT NULL COMMENT '活动名称',
+    `full_amount` DECIMAL(10,2) NOT NULL COMMENT '满金额',
+    `reduce_amount` DECIMAL(10,2) NOT NULL COMMENT '减金额',
+    `start_time` DATETIME NOT NULL COMMENT '开始时间',
+    `end_time` DATETIME NOT NULL COMMENT '结束时间',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态（0：未开始，1：进行中，2：已结束）',
+    `product_ids` TEXT COMMENT '适用商品ID（逗号分隔，为空表示全场通用）',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_full_reduction_shop_id` (`shop_id`),
+    INDEX `idx_full_reduction_time` (`start_time`, `end_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='满减活动表';
+
+-- 限时折扣表
+DROP TABLE IF EXISTS `promotion_discount`;
+CREATE TABLE `promotion_discount` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `shop_id` BIGINT NOT NULL COMMENT '店铺ID',
+    `promotion_name` VARCHAR(100) NOT NULL COMMENT '活动名称',
+    `spu_id` BIGINT NOT NULL COMMENT '商品SPU ID',
+    `sku_id` BIGINT COMMENT 'SKU ID（为空则适用所有SKU）',
+    `discount_price` DECIMAL(10,2) NOT NULL COMMENT '折扣价格',
+    `discount_limit` INT DEFAULT 0 COMMENT '限购数量（0表示不限）',
+    `total_stock` INT NOT NULL COMMENT '活动库存',
+    `sold_count` INT NOT NULL DEFAULT 0 COMMENT '已售数量',
+    `start_time` DATETIME NOT NULL COMMENT '开始时间',
+    `end_time` DATETIME NOT NULL COMMENT '结束时间',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态（0：未开始，1：进行中，2：已结束）',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_discount_shop_id` (`shop_id`),
+    INDEX `idx_discount_spu_id` (`spu_id`),
+    INDEX `idx_discount_time` (`start_time`, `end_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='限时折扣表';
+
+-- 秒杀活动表
+DROP TABLE IF EXISTS `promotion_seckill`;
+CREATE TABLE `promotion_seckill` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `shop_id` BIGINT NOT NULL COMMENT '店铺ID',
+    `promotion_name` VARCHAR(100) NOT NULL COMMENT '活动名称',
+    `sku_id` BIGINT NOT NULL COMMENT 'SKU ID',
+    `seckill_price` DECIMAL(10,2) NOT NULL COMMENT '秒杀价格',
+    `seckill_stock` INT NOT NULL COMMENT '秒杀库存',
+    `sold_count` INT NOT NULL DEFAULT 0 COMMENT '已秒数量',
+    `limit_count` INT NOT NULL DEFAULT 1 COMMENT '每人限购数量',
+    `start_time` DATETIME NOT NULL COMMENT '开始时间',
+    `end_time` DATETIME NOT NULL COMMENT '结束时间',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态（0：未开始，1：进行中，2：已结束）',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_seckill_shop_id` (`shop_id`),
+    INDEX `idx_seckill_sku_id` (`sku_id`),
+    INDEX `idx_seckill_time` (`start_time`, `end_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='秒杀活动表';
+
+-- ========================================
+-- 订单评价表
+-- ========================================
+
+DROP TABLE IF EXISTS `order_review`;
+CREATE TABLE `order_review` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `order_no` VARCHAR(32) NOT NULL COMMENT '订单号',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `spu_id` BIGINT NOT NULL COMMENT '商品SPU ID',
+    `sku_id` BIGINT COMMENT 'SKU ID',
+    `rating` TINYINT NOT NULL COMMENT '评分（1-5星）',
+    `content` VARCHAR(1000) COMMENT '评价内容',
+    `images` TEXT COMMENT '评价图片（逗号分隔）',
+    `is_anonymous` TINYINT DEFAULT 0 COMMENT '是否匿名（0：否，1：是）',
+    `reply_content` VARCHAR(1000) COMMENT '商家回复',
+    `reply_time` DATETIME COMMENT '回复时间',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_review_order_no` (`order_no`),
+    INDEX `idx_review_user_id` (`user_id`),
+    INDEX `idx_review_spu_id` (`spu_id`),
+    UNIQUE KEY `uk_review_order_spu` (`order_no`, `spu_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单评价表';
+
+-- ========================================
+-- 店铺装修表
+-- ========================================
+
+-- 店铺页面模块表
+DROP TABLE IF EXISTS `shop_page_module`;
+CREATE TABLE `shop_page_module` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `shop_id` BIGINT NOT NULL COMMENT '店铺ID',
+    `module_name` VARCHAR(50) NOT NULL COMMENT '模块名称',
+    `module_type` TINYINT NOT NULL COMMENT '模块类型（1：轮播图，2：商品推荐，3：公告，4：自定义）',
+    `module_config` TEXT COMMENT '模块配置（JSON）',
+    `sort_order` INT DEFAULT 0 COMMENT '排序',
+    `is_enabled` TINYINT DEFAULT 1 COMMENT '是否启用',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_module_shop_id` (`shop_id`),
+    INDEX `idx_module_type` (`module_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='店铺页面模块表';
+
+-- ========================================
+-- 浏览记录表（补充 visitor_log 字段）
+-- ========================================
+
+DROP TABLE IF EXISTS `visitor_log`;
+CREATE TABLE `visitor_log` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `shop_id` BIGINT COMMENT '店铺ID',
+    `spu_id` BIGINT COMMENT '商品SPU ID',
+    `user_id` BIGINT COMMENT '用户ID（0表示游客）',
+    `ip_address` VARCHAR(50) COMMENT 'IP地址',
+    `user_agent` VARCHAR(500) COMMENT '浏览器信息',
+    `visit_time` DATETIME NOT NULL COMMENT '访问时间',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_visitor_shop_id` (`shop_id`),
+    INDEX `idx_visitor_spu_id` (`spu_id`),
+    INDEX `idx_visitor_time` (`visit_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='访客记录表';
+
+-- ========================================
 -- 初始化测试数据
 -- ========================================
 

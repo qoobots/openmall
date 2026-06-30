@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品评价 - OpenMall</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .review-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .stars { color: #ff9900; font-size: 16px; }
+        .review-images img { width: 80px; height: 80px; object-fit: cover; margin: 5px; border-radius: 4px; }
+        .reply-box { background: #f5f5f5; padding: 10px; margin-top: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>商品评价</h3>
+    <div class="review-list">
+        <div th:if="${page.records == null || page.records.isEmpty()}">
+            <p style="text-align:center;padding:40px;">暂无评价</p>
+        </div>
+        <div class="review-item" th:each="item : ${page.records}">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span class="stars">
+                    <span th:each="i : ${#numbers.sequence(1, item.rating)}">★</span>
+                    <span th:each="i : ${#numbers.sequence(1, 5 - item.rating)}" style="color:#ccc;">★</span>
+                </span>
+                <small th:text="${#temporals.format(item.createTime, 'yyyy-MM-dd HH:mm')}"></small>
+            </div>
+            <p th:text="${item.content}" style="margin:8px 0;"></p>
+            <div class="review-images" th:if="${item.images != null}">
+                <img th:each="img : ${item.images.split(',')}" th:src="${img}" alt="评价图片">
+            </div>
+            <div class="reply-box" th:if="${item.replyContent != null}">
+                <strong>商家回复：</strong><span th:text="${item.replyContent}"></span>
+                <small th:if="${item.replyTime != null}" th:text="${' (' + #temporals.format(item.replyTime, 'yyyy-MM-dd HH:mm') + ')'}"></small>
+            </div>
+        </div>
+    </div>
+    <div class="pagination" th:if="${page.totalPages > 1}">
+        <span>第 <span th:text="${page.pageNum}"></span> / <span th:text="${page.totalPages}"></span> 页，共 <span th:text="${page.total}"></span> 条</span>
+    </div>
+</div>
+</body>
+</html>

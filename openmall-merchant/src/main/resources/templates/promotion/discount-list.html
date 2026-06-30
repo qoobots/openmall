@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>限时折扣 - 商家后台</title>
+    <link rel="stylesheet" href="/merchant/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h2>限时折扣管理</h2>
+    <div class="toolbar">
+        <a href="/merchant/promotion/discount/add" class="btn btn-primary">新增限时折扣</a>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>活动名称</th>
+                <th>商品ID</th>
+                <th>折扣价</th>
+                <th>活动库存</th>
+                <th>已售</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${page.records}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.promotionName}"></td>
+                <td th:text="${item.spuId}"></td>
+                <td th:text="${item.discountPrice}"></td>
+                <td th:text="${item.totalStock}"></td>
+                <td th:text="${item.soldCount}"></td>
+                <td th:text="${item.startTime}"></td>
+                <td th:text="${item.endTime}"></td>
+                <td>
+                    <span th:if="${item.status == 0}" class="badge badge-info">未开始</span>
+                    <span th:if="${item.status == 1}" class="badge badge-success">进行中</span>
+                    <span th:if="${item.status == 2}" class="badge badge-secondary">已结束</span>
+                </td>
+                <td>
+                    <a th:href="@{/merchant/promotion/discount/edit/{id}(id=${item.id})}" class="btn btn-sm">编辑</a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">删除</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <span>第 <span th:text="${page.pageNum}"></span> / <span th:text="${page.totalPages}"></span> 页，共 <span th:text="${page.total}"></span> 条</span>
+    </div>
+</div>
+<script>
+function deleteItem(id) {
+    if (confirm('确定删除该限时折扣吗？')) {
+        fetch('/merchant/promotion/discount/delete/' + id, { method: 'DELETE' })
+            .then(r => r.json()).then(d => { alert(d.message); location.reload(); });
+    }
+}
+</script>
+</body>
+</html>
