@@ -62,6 +62,40 @@ public class UserController {
     }
 
     /**
+     * 修改密码页
+     */
+    @GetMapping("/password")
+    public String passwordPage() {
+        return "user/password";
+    }
+
+    /**
+     * 修改密码
+     */
+    @PostMapping("/password")
+    @ResponseBody
+    public Result<Void> changePassword(@RequestParam String oldPassword,
+                                        @RequestParam String newPassword,
+                                        @RequestParam String confirmPassword) {
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return Result.error("请先登录");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            return Result.error("两次输入的新密码不一致");
+        }
+        if (newPassword.length() < 6) {
+            return Result.error("新密码长度不能少于6位");
+        }
+        try {
+            userService.changePassword(currentUser.getId(), oldPassword, newPassword);
+            return Result.success("密码修改成功");
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
      * 获取当前登录用户
      */
     private User getCurrentUser() {

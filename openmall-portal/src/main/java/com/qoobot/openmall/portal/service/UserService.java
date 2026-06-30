@@ -39,4 +39,9 @@ public interface UserService {
      * 检查用户名是否存在
      */
     boolean checkUsernameExists(String username);
+
+    /**
+     * 修改密码
+     */
+    void changePassword(Long userId, String oldPassword, String newPassword);
 }

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退款详情 - OpenMall</title>
+</head>
+<body>
+<div class="container py-4">
+    <h4 class="mb-4">退款详情</h4>
+    <div class="card" th:if="${refund != null}">
+        <div class="card-body">
+            <table class="table">
+                <tr><th class="w-25">退款单号</th><td th:text="${refund.refundNo}"></td></tr>
+                <tr><th>原订单号</th><td th:text="${refund.orderNo}"></td></tr>
+                <tr><th>退款金额</th><td class="text-danger fw-bold">¥<span th:text="${refund.refundAmount}"></span></td></tr>
+                <tr><th>退款类型</th><td th:text="${refund.refundType == 1} ? '仅退款' : '退货退款'"></td></tr>
+                <tr><th>退款原因</th><td th:text="${refund.refundReason}"></td></tr>
+                <tr>
+                    <th>状态</th>
+                    <td>
+                        <span th:switch="${refund.refundStatus}">
+                            <span th:case="0" class="badge bg-warning">待审核</span>
+                            <span th:case="1" class="badge bg-success">已同意</span>
+                            <span th:case="2" class="badge bg-danger">已拒绝</span>
+                            <span th:case="3" class="badge bg-info">退款中</span>
+                            <span th:case="4" class="badge bg-success">已完成</span>
+                        </span>
+                    </td>
+                </tr>
+                <tr th:if="${refund.refuseReason}"><th>拒绝原因</th><td th:text="${refund.refuseReason}"></td></tr>
+                <tr><th>申请时间</th><td th:text="${#temporals.format(refund.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td></tr>
+                <tr th:if="${refund.auditTime}"><th>审核时间</th><td th:text="${#temporals.format(refund.auditTime, 'yyyy-MM-dd HH:mm:ss')}"></td></tr>
+            </table>
+        </div>
+    </div>
+    <a href="/refund/list" class="btn btn-secondary mt-3">返回列表</a>
+</div>
+</body>
+</html>

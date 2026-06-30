@@ -30,6 +30,9 @@ public class ProductSku extends BaseEntity {
     @Column(name = "stock", nullable = false)
     private Integer stock;
 
+    @Column(name = "stock_warning")
+    private Integer stockWarning = 0;
+
     @Column(name = "sales", nullable = false)
     private Integer sales = 0;
 }

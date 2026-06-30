@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优惠券中心 - OpenMall</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout/main :: content}">
+    <div class="container py-4">
+        <h4 class="mb-4">优惠券中心</h4>
+
+        <!-- 可领取优惠券 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">可领取优惠券</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" th:if="${availableCoupons.list != null and !availableCoupons.list.empty}">
+                    <div class="col-md-4 mb-3" th:each="coupon : ${availableCoupons.list}">
+                        <div class="coupon-card p-3 border rounded">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 th:text="${coupon.couponName}"></h6>
+                                    <div class="text-danger fs-4">
+                                        ¥<span th:text="${coupon.discountAmount}"></span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        满 <span th:text="${coupon.minConsume}"></span> 元可用
+                                    </div>
+                                    <div class="text-muted small" th:if="${coupon.remainCount != null}">
+                                        剩余 <span th:text="${coupon.remainCount}"></span> 张
+                                    </div>
+                                </div>
+                                <button class="btn btn-danger btn-sm" th:onclick="'receiveCoupon(' + ${coupon.id} + ')'">立即领取</button>
+                            </div>
+                            <div class="text-muted small mt-2">
+                                有效期至：<span th:text="${#temporals.format(coupon.endTime, 'yyyy-MM-dd')}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:unless="${availableCoupons.list != null and !availableCoupons.list.empty}" class="text-center text-muted py-4">
+                    暂无可领取的优惠券
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的优惠券 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">我的优惠券</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" th:if="${myCoupons.list != null and !myCoupons.list.empty}">
+                    <div class="col-md-4 mb-3" th:each="uc : ${myCoupons.list}">
+                        <div class="coupon-card p-3 border rounded" th:classappend="${uc.status == 1} ? 'bg-light' : ''">
+                            <h6>优惠券 #<span th:text="${uc.couponId}"></span></h6>
+                            <div>
+                                <span class="badge" th:classappend="${uc.status == 0} ? 'bg-success' : (${uc.status == 1} ? 'bg-secondary' : 'bg-warning')"
+                                      th:text="${uc.status == 0} ? '未使用' : (${uc.status == 1} ? '已使用' : '已过期')"></span>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                领取时间：<span th:text="${#temporals.format(uc.createTime, 'yyyy-MM-dd HH:mm')}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:unless="${myCoupons.list != null and !myCoupons.list.empty}" class="text-center text-muted py-4">
+                    暂无优惠券，快去领取吧
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function receiveCoupon(couponId) {
+    fetch('/coupon/receive/' + couponId, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.code === 200) {
+                alert('领取成功！');
+                location.reload();
+            } else {
+                alert(data.message || '领取失败');
+            }
+        })
+        .catch(() => alert('网络错误'));
+}
+</script>
+</body>
+</html>

@@ -176,6 +176,7 @@ CREATE TABLE `product_sku` (
     `specs` TEXT COMMENT '规格属性（JSON）',
     `price` DECIMAL(10,2) NOT NULL COMMENT '价格',
     `stock` INT NOT NULL COMMENT '库存',
+    `stock_warning` INT DEFAULT 0 COMMENT '库存预警阈值',
     `sales` INT NOT NULL DEFAULT 0 COMMENT '销量',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `create_by` BIGINT NOT NULL,
@@ -309,6 +310,180 @@ CREATE TABLE `user_favorite` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品收藏表';
 
 -- ========================================
+-- 用户优惠券表
+-- ========================================
+
+DROP TABLE IF EXISTS `user_coupon`;
+CREATE TABLE `user_coupon` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `coupon_id` BIGINT NOT NULL COMMENT '优惠券ID',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态（0：未使用，1：已使用，2：已过期）',
+    `use_time` DATETIME COMMENT '使用时间',
+    `order_no` VARCHAR(32) COMMENT '关联订单号',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_user_coupon_user_id` (`user_id`),
+    INDEX `idx_user_coupon_coupon_id` (`coupon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户优惠券表';
+
+-- ========================================
+-- 退款申请表
+-- ========================================
+
+DROP TABLE IF EXISTS `refund_order`;
+CREATE TABLE `refund_order` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `order_no` VARCHAR(32) NOT NULL COMMENT '原订单号',
+    `refund_no` VARCHAR(32) NOT NULL UNIQUE COMMENT '退款单号',
+    `user_id` BIGINT NOT NULL COMMENT '申请人ID',
+    `shop_id` BIGINT NOT NULL COMMENT '店铺ID',
+    `refund_amount` DECIMAL(10,2) NOT NULL COMMENT '退款金额',
+    `refund_reason` VARCHAR(500) COMMENT '退款原因',
+    `refund_type` TINYINT NOT NULL COMMENT '退款类型（1：仅退款，2：退货退款）',
+    `refund_status` TINYINT NOT NULL DEFAULT 0 COMMENT '退款状态（0：待审核，1：已同意，2：已拒绝，3：退款中，4：已完成）',
+    `refuse_reason` VARCHAR(500) COMMENT '拒绝原因',
+    `audit_time` DATETIME COMMENT '审核时间',
+    `refund_time` DATETIME COMMENT '退款完成时间',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_refund_order_no` (`order_no`),
+    INDEX `idx_refund_user_id` (`user_id`),
+    INDEX `idx_refund_shop_id` (`shop_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='退款申请表';
+
+-- ========================================
+-- 系统菜单表
+-- ========================================
+
+DROP TABLE IF EXISTS `sys_menu`;
+CREATE TABLE `sys_menu` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `parent_id` BIGINT DEFAULT 0 COMMENT '父菜单ID',
+    `menu_name` VARCHAR(50) NOT NULL COMMENT '菜单名称',
+    `menu_path` VARCHAR(200) COMMENT '路由路径',
+    `menu_icon` VARCHAR(100) COMMENT '菜单图标',
+    `permission` VARCHAR(200) COMMENT '权限标识',
+    `menu_type` TINYINT NOT NULL COMMENT '类型（1：目录，2：菜单，3：按钮）',
+    `sort_order` INT DEFAULT 0 COMMENT '排序',
+    `is_visible` TINYINT DEFAULT 1 COMMENT '是否可见',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_menu_parent_id` (`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统菜单表';
+
+-- ========================================
+-- 系统角色表
+-- ========================================
+
+DROP TABLE IF EXISTS `sys_role`;
+CREATE TABLE `sys_role` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `role_name` VARCHAR(50) NOT NULL COMMENT '角色名称',
+    `role_code` VARCHAR(50) NOT NULL UNIQUE COMMENT '角色编码',
+    `role_desc` VARCHAR(200) COMMENT '角色描述',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态（0：禁用，1：启用）',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统角色表';
+
+-- ========================================
+-- 角色菜单关联表
+-- ========================================
+
+DROP TABLE IF EXISTS `sys_role_menu`;
+CREATE TABLE `sys_role_menu` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `role_id` BIGINT NOT NULL COMMENT '角色ID',
+    `menu_id` BIGINT NOT NULL COMMENT '菜单ID',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    UNIQUE KEY `uk_role_menu` (`role_id`, `menu_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色菜单关联表';
+
+-- ========================================
+-- 用户角色关联表
+-- ========================================
+
+DROP TABLE IF EXISTS `sys_user_role`;
+CREATE TABLE `sys_user_role` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+    `role_id` BIGINT NOT NULL COMMENT '角色ID',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    UNIQUE KEY `uk_user_role` (`user_id`, `role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色关联表';
+
+-- ========================================
+-- 系统参数配置表
+-- ========================================
+
+DROP TABLE IF EXISTS `sys_config`;
+CREATE TABLE `sys_config` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `config_key` VARCHAR(100) NOT NULL UNIQUE COMMENT '参数键名',
+    `config_value` TEXT COMMENT '参数值',
+    `config_name` VARCHAR(100) COMMENT '参数名称',
+    `config_desc` VARCHAR(500) COMMENT '参数描述',
+    `config_type` TINYINT NOT NULL DEFAULT 1 COMMENT '类型（1：系统参数，2：业务参数）',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统参数配置表';
+
+-- ========================================
+-- 库存出入库记录表
+-- ========================================
+
+DROP TABLE IF EXISTS `stock_log`;
+CREATE TABLE `stock_log` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `sku_id` BIGINT NOT NULL COMMENT 'SKU ID',
+    `change_type` TINYINT NOT NULL COMMENT '变更类型（1：入库，2：出库，3：订单锁定，4：订单释放，5：退货入库）',
+    `change_count` INT NOT NULL COMMENT '变更数量',
+    `before_stock` INT NOT NULL COMMENT '变更前库存',
+    `after_stock` INT NOT NULL COMMENT '变更后库存',
+    `related_no` VARCHAR(32) COMMENT '关联单号',
+    `remark` VARCHAR(500) COMMENT '备注',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_by` BIGINT NOT NULL,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `update_by` BIGINT NOT NULL,
+    `is_deleted` TINYINT NOT NULL DEFAULT 0,
+    `version` INT NOT NULL DEFAULT 0,
+    INDEX `idx_stock_log_sku_id` (`sku_id`),
+    INDEX `idx_stock_log_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存出入库记录表';
+
+-- ========================================
 -- 初始化测试数据
 -- ========================================
 
@@ -339,3 +514,33 @@ INSERT INTO `brand` (`brand_name`, `brand_desc`, `sort_order`, `is_show`, `creat
 ('苹果', 'Apple Inc.', 1, 1, 1, 1),
 ('华为', 'Huawei Technologies', 2, 1, 1, 1),
 ('小米', 'Xiaomi Corporation', 3, 1, 1, 1);
+
+-- 插入系统菜单
+INSERT INTO `sys_menu` (`id`, `parent_id`, `menu_name`, `menu_path`, `menu_icon`, `permission`, `menu_type`, `sort_order`, `create_by`, `update_by`) VALUES
+(1, 0, '系统管理', '', 'fa-cog', 'system', 1, 99, 1, 1),
+(2, 1, '用户管理', '/platform/user', 'fa-users', 'system:user', 2, 1, 1, 1),
+(3, 1, '商家管理', '/platform/merchant', 'fa-store', 'system:merchant', 2, 2, 1, 1),
+(4, 1, '角色管理', '/platform/role', 'fa-user-shield', 'system:role', 2, 3, 1, 1),
+(5, 1, '菜单管理', '/platform/menu', 'fa-bars', 'system:menu', 2, 4, 1, 1),
+(6, 1, '参数配置', '/platform/config', 'fa-cogs', 'system:config', 2, 5, 1, 1);
+
+-- 插入系统角色
+INSERT INTO `sys_role` (`id`, `role_name`, `role_code`, `role_desc`, `create_by`, `update_by`) VALUES
+(1, '超级管理员', 'admin', '系统超级管理员，拥有所有权限', 1, 1),
+(2, '运营人员', 'operator', '平台运营人员', 1, 1);
+
+-- 插入角色菜单关联（超级管理员拥有所有菜单）
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`, `create_by`, `update_by`) VALUES
+(1, 1, 1, 1), (1, 2, 1, 1), (1, 3, 1, 1), (1, 4, 1, 1), (1, 5, 1, 1), (1, 6, 1, 1);
+
+-- 插入用户角色关联
+INSERT INTO `sys_user_role` (`user_id`, `role_id`, `create_by`, `update_by`) VALUES
+(1, 1, 1, 1);
+
+-- 插入系统参数
+INSERT INTO `sys_config` (`config_key`, `config_value`, `config_name`, `config_desc`, `config_type`, `create_by`, `update_by`) VALUES
+('upload.max_size', '10', '上传文件大小限制(MB)', '上传文件大小限制(MB)', 1, 1, 1),
+('upload.allowed_types', 'jpg,png,gif,webp', '允许上传的文件类型', '允许上传的文件类型', 1, 1, 1),
+('page.default_size', '20', '默认分页大小', '默认分页大小', 1, 1, 1),
+('order.auto_cancel_minutes', '30', '订单自动取消时间(分钟)', '未付款订单超时自动取消时间', 2, 1, 1),
+('order.auto_confirm_days', '15', '订单自动确认收货天数', '发货后自动确认收货天数', 2, 1, 1);

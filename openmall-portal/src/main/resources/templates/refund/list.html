@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退款记录 - OpenMall</title>
+</head>
+<body>
+<div class="container py-4">
+    <h4 class="mb-4">退款记录</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered" th:if="${page.list != null and !page.list.empty}">
+            <thead class="table-light">
+                <tr>
+                    <th>退款单号</th>
+                    <th>原订单号</th>
+                    <th>退款金额</th>
+                    <th>退款类型</th>
+                    <th>状态</th>
+                    <th>申请时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="refund : ${page.list}">
+                    <td th:text="${refund.refundNo}"></td>
+                    <td th:text="${refund.orderNo}"></td>
+                    <td class="text-danger">¥<span th:text="${refund.refundAmount}"></span></td>
+                    <td>
+                        <span th:text="${refund.refundType == 1} ? '仅退款' : '退货退款'"></span>
+                    </td>
+                    <td>
+                        <span th:switch="${refund.refundStatus}">
+                            <span th:case="0" class="badge bg-warning">待审核</span>
+                            <span th:case="1" class="badge bg-success">已同意</span>
+                            <span th:case="2" class="badge bg-danger">已拒绝</span>
+                            <span th:case="3" class="badge bg-info">退款中</span>
+                            <span th:case="4" class="badge bg-success">已完成</span>
+                        </span>
+                    </td>
+                    <td th:text="${#temporals.format(refund.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/refund/detail/{id}(id=${refund.id})}">详情</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:unless="${page.list != null and !page.list.empty}" class="text-center text-muted py-4">
+            暂无退款记录
+        </div>
+    </div>
+</div>
+</body>
+</html>

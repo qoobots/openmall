@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退款处理 - OpenMall 商家后台</title>
+</head>
+<body>
+<div class="container-fluid p-4">
+    <h4 class="mb-4">退款处理</h4>
+    <div class="card" th:if="${refund != null}">
+        <div class="card-body">
+            <table class="table">
+                <tr><th class="w-25">退款单号</th><td th:text="${refund.refundNo}"></td></tr>
+                <tr><th>原订单号</th><td th:text="${refund.orderNo}"></td></tr>
+                <tr><th>退款金额</th><td class="text-danger fw-bold">¥<span th:text="${refund.refundAmount}"></span></td></tr>
+                <tr><th>退款类型</th><td th:text="${refund.refundType == 1} ? '仅退款' : '退货退款'"></td></tr>
+                <tr><th>退款原因</th><td th:text="${refund.refundReason}"></td></tr>
+                <tr><th>申请时间</th><td th:text="${#temporals.format(refund.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td></tr>
+            </table>
+
+            <div th:if="${refund.refundStatus == 0}" class="mt-4">
+                <div class="mb-3">
+                    <label class="form-label">拒绝原因（拒绝时填写）</label>
+                    <textarea id="refuseReason" class="form-control" rows="3"></textarea>
+                </div>
+                <button class="btn btn-success me-2" th:onclick="'auditRefund(' + ${refund.id} + ', 1)'">同意退款</button>
+                <button class="btn btn-danger" th:onclick="'auditRefund(' + ${refund.id} + ', 2)'">拒绝退款</button>
+            </div>
+            <div th:unless="${refund.refundStatus == 0}" class="mt-4">
+                <div class="alert" th:classappend="${refund.refundStatus == 1 or refund.refundStatus == 3 or refund.refundStatus == 4} ? 'alert-success' : 'alert-danger'">
+                    该退款单已处理
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="/refund/list" class="btn btn-secondary mt-3">返回列表</a>
+</div>
+
+<script>
+function auditRefund(refundId, result) {
+    const reason = document.getElementById('refuseReason').value;
+    fetch('/refund/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refundId, result, reason })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.code === 200) {
+            alert(result === 1 ? '已同意退款' : '已拒绝退款');
+            location.reload();
+        } else {
+            alert(data.message || '操作失败');
+        }
+    })
+    .catch(() => alert('网络错误'));
+}
+</script>
+</body>
+</html>

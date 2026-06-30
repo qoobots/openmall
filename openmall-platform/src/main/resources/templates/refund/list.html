@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单仲裁 - OpenMall 平台管理</title>
+    <link rel="stylesheet" th:href="@{/css/platform.css}">
+</head>
+<body>
+<div class="container-fluid p-4">
+    <h4 class="mb-4">订单仲裁</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered" th:if="${page.list != null and !page.list.empty}">
+            <thead class="table-light">
+                <tr>
+                    <th>退款单号</th>
+                    <th>原订单号</th>
+                    <th>买家ID</th>
+                    <th>店铺ID</th>
+                    <th>退款金额</th>
+                    <th>状态</th>
+                    <th>申请时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="refund : ${page.list}">
+                    <td th:text="${refund.refundNo}"></td>
+                    <td th:text="${refund.orderNo}"></td>
+                    <td th:text="${refund.userId}"></td>
+                    <td th:text="${refund.shopId}"></td>
+                    <td class="text-danger">¥<span th:text="${refund.refundAmount}"></span></td>
+                    <td>
+                        <span th:switch="${refund.refundStatus}">
+                            <span th:case="0" class="badge bg-warning">待审核</span>
+                            <span th:case="1" class="badge bg-success">已同意</span>
+                            <span th:case="2" class="badge bg-danger">已拒绝</span>
+                            <span th:case="3" class="badge bg-info">退款中</span>
+                            <span th:case="4" class="badge bg-success">已完成</span>
+                        </span>
+                    </td>
+                    <td th:text="${#temporals.format(refund.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/refund/detail/{id}(id=${refund.id})}">仲裁</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:unless="${page.list != null and !page.list.empty}" class="text-center text-muted py-4">
+            暂无退款记录
+        </div>
+    </div>
+</div>
+</body>
+</html>

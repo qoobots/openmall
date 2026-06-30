@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色管理 - OpenMall 平台管理</title>
+    <link rel="stylesheet" th:href="@{/css/platform.css}">
+</head>
+<body>
+<div class="container-fluid p-4">
+    <h4 class="mb-4">角色管理</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-primary btn-sm mb-3" onclick="addRole()">新增角色</button>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>角色名称</th>
+                            <th>角色编码</th>
+                            <th>描述</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="role : ${roles}">
+                            <td th:text="${role.id}"></td>
+                            <td th:text="${role.roleName}"></td>
+                            <td th:text="${role.roleCode}"></td>
+                            <td th:text="${role.roleDesc}"></td>
+                            <td>
+                                <span th:class="${role.status == 1} ? 'badge bg-success' : 'badge bg-danger'"
+                                      th:text="${role.status == 1} ? '启用' : '禁用'"></span>
+                            </td>
+                            <td th:text="${#temporals.format(role.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td>
+                                <button class="btn btn-sm btn-info" th:onclick="'assignMenus(' + ${role.id} + ')'">分配权限</button>
+                                <button class="btn btn-sm btn-warning" th:onclick="'editRole(' + ${role.id} + ')'">编辑</button>
+                                <button class="btn btn-sm btn-danger" th:onclick="'deleteRole(' + ${role.id} + ')'">删除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function addRole() { alert('新增角色功能'); }
+function editRole(id) { alert('编辑角色 ID: ' + id); }
+function deleteRole(id) { alert('删除角色 ID: ' + id); }
+function assignMenus(id) { alert('分配权限 ID: ' + id); }
+</script>
+</body>
+</html>

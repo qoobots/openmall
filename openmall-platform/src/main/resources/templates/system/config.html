@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>参数配置 - OpenMall 平台管理</title>
+    <link rel="stylesheet" th:href="@{/css/platform.css}">
+</head>
+<body>
+<div class="container-fluid p-4">
+    <h4 class="mb-4">参数配置</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-primary btn-sm mb-3" onclick="addConfig()">新增配置</button>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>参数键名</th>
+                            <th>参数名称</th>
+                            <th>参数值</th>
+                            <th>描述</th>
+                            <th>类型</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="config : ${page.list}">
+                            <td th:text="${config.id}"></td>
+                            <td><code th:text="${config.configKey}"></code></td>
+                            <td th:text="${config.configName}"></td>
+                            <td>
+                                <span th:if="${#strings.length(config.configValue) > 50}"
+                                      th:text="${#strings.substring(config.configValue, 0, 50) + '...'}"></span>
+                                <span th:unless="${#strings.length(config.configValue) > 50}"
+                                      th:text="${config.configValue}"></span>
+                            </td>
+                            <td th:text="${config.configDesc}"></td>
+                            <td>
+                                <span th:class="${config.configType == 1} ? 'badge bg-primary' : 'badge bg-info'"
+                                      th:text="${config.configType == 1} ? '系统参数' : '业务参数'"></span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" th:onclick="'editConfig(' + ${config.id} + ')'">编辑</button>
+                                <button class="btn btn-sm btn-danger" th:onclick="'deleteConfig(' + ${config.id} + ')'">删除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 分页 -->
+            <nav th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${!page.hasPrev} ? 'disabled'">
+                        <a class="page-link" th:href="@{/system/config(pageNum=${page.pageNum - 1})}">上一页</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link" th:text="${page.pageNum} + '/' + ${page.totalPages}"></span>
+                    </li>
+                    <li class="page-item" th:classappend="${!page.hasNext} ? 'disabled'">
+                        <a class="page-link" th:href="@{/system/config(pageNum=${page.pageNum + 1})}">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<script>
+function addConfig() { alert('新增配置功能'); }
+function editConfig(id) { alert('编辑配置 ID: ' + id); }
+function deleteConfig(id) { alert('删除配置 ID: ' + id); }
+</script>
+</body>
+</html>

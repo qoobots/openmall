@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜单管理 - OpenMall 平台管理</title>
+    <link rel="stylesheet" th:href="@{/css/platform.css}">
+</head>
+<body>
+<div class="container-fluid p-4">
+    <h4 class="mb-4">菜单管理</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-primary btn-sm mb-3" onclick="addMenu()">新增菜单</button>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>菜单名称</th>
+                            <th>路由路径</th>
+                            <th>图标</th>
+                            <th>权限标识</th>
+                            <th>类型</th>
+                            <th>排序</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <th:block th:each="menu : ${menuTree}">
+                            <tr th:replace="~{system/menu :: menuRow(menu=${menu}, level=0)}"></tr>
+                        </th:block>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 菜单行递归模板 -->
+<th:block th:fragment="menuRow(menu, level)">
+    <tr>
+        <td>
+            <span th:style="'margin-left:' + ${level * 20} + 'px'"></span>
+            <span th:if="${level > 0}">├─ </span>
+            <span th:text="${menu.menuName}"></span>
+        </td>
+        <td th:text="${menu.menuPath}"></td>
+        <td><i th:class="${menu.menuIcon}" th:if="${menu.menuIcon}"></i></td>
+        <td th:text="${menu.permission}"></td>
+        <td>
+            <span th:switch="${menu.menuType}">
+                <span th:case="1" class="badge bg-info">目录</span>
+                <span th:case="2" class="badge bg-primary">菜单</span>
+                <span th:case="3" class="badge bg-secondary">按钮</span>
+            </span>
+        </td>
+        <td th:text="${menu.sortOrder}"></td>
+        <td>
+            <button class="btn btn-sm btn-warning" th:onclick="'editMenu(' + ${menu.id} + ')'">编辑</button>
+            <button class="btn btn-sm btn-danger" th:onclick="'deleteMenu(' + ${menu.id} + ')'">删除</button>
+        </td>
+    </tr>
+    <th:block th:each="child : ${menu.children}">
+        <tr th:replace="~{system/menu :: menuRow(menu=${child}, level=${level + 1})}"></tr>
+    </th:block>
+</th:block>
+
+<script>
+function addMenu() { alert('新增菜单功能'); }
+function editMenu(id) { alert('编辑菜单 ID: ' + id); }
+function deleteMenu(id) { alert('删除菜单 ID: ' + id); }
+</script>
+</body>
+</html>

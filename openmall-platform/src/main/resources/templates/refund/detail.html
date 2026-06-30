@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单仲裁 - OpenMall 平台管理</title>
+    <link rel="stylesheet" th:href="@{/css/platform.css}">
+</head>
+<body>
+<div class="container-fluid p-4">
+    <h4 class="mb-4">订单仲裁处理</h4>
+    <div class="card" th:if="${refund != null}">
+        <div class="card-body">
+            <table class="table">
+                <tr><th class="w-25">退款单号</th><td th:text="${refund.refundNo}"></td></tr>
+                <tr><th>原订单号</th><td th:text="${refund.orderNo}"></td></tr>
+                <tr><th>买家ID</th><td th:text="${refund.userId}"></td></tr>
+                <tr><th>店铺ID</th><td th:text="${refund.shopId}"></td></tr>
+                <tr><th>退款金额</th><td class="text-danger fw-bold">¥<span th:text="${refund.refundAmount}"></span></td></tr>
+                <tr><th>退款类型</th><td th:text="${refund.refundType == 1} ? '仅退款' : '退货退款'"></td></tr>
+                <tr><th>退款原因</th><td th:text="${refund.refundReason}"></td></tr>
+                <tr><th>申请时间</th><td th:text="${#temporals.format(refund.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td></tr>
+            </table>
+
+            <div th:if="${refund.refundStatus == 0}" class="mt-4">
+                <div class="mb-3">
+                    <label class="form-label">仲裁备注</label>
+                    <textarea id="remark" class="form-control" rows="3"></textarea>
+                </div>
+                <button class="btn btn-success me-2" th:onclick="'arbitrate(' + ${refund.id} + ', 1)'">同意退款</button>
+                <button class="btn btn-danger" th:onclick="'arbitrate(' + ${refund.id} + ', 2)'">驳回申请</button>
+            </div>
+            <div th:unless="${refund.refundStatus == 0}" class="mt-4">
+                <div class="alert alert-info">该退款单已处理</div>
+            </div>
+        </div>
+    </div>
+    <a href="/refund/list" class="btn btn-secondary mt-3">返回列表</a>
+</div>
+
+<script>
+function arbitrate(refundId, result) {
+    const remark = document.getElementById('remark').value;
+    fetch('/refund/arbitrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refundId, result, remark })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.code === 200) {
+            alert(result === 1 ? '已同意退款' : '已驳回申请');
+            location.reload();
+        } else {
+            alert(data.message || '操作失败');
+        }
+    })
+    .catch(() => alert('网络错误'));
+}
+</script>
+</body>
+</html>
